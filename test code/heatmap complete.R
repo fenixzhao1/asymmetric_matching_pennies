@@ -1,9 +1,10 @@
+##########Data preparation##########
+# load packages
 library(dplyr)
 library(lattice)
 library(MASS)
 library(latticeExtra)
 
-##########Data preparation##########
 ## load data 
 bimatrix_choice <- read.csv("/Users/fenix/Dropbox/GSR/Continuous Bimatrix/production_5_22/bimatrix_pilot_18-5-22.csv", header = T)
 

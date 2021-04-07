@@ -1,6 +1,6 @@
 **********Data preparation**********
 * open dataset
-use "/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/stata/mp_production.dta", clear
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear
 
 * set subperiod variable
 gen subperiod = 0
@@ -83,42 +83,72 @@ drop if round == 19 & dummy_mm == 0
 drop if round == 25 & dummy_mm == 0
 
 * save dataset
-save "/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/stata/mp_production.dta", replace
+save "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", replace
 
 
 **********Directional learning**********
+** Cluster std error at pair level
 * Row player learning
 * regression in continuous time
-use "/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/stata/mp_production.dta", clear
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear
 xtset session_round_pair_id tick
 xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_8002 p1_regret_sign_IDDS ///
       p1_regret_sign_pure_mm p1_regret_sign_pure_8002 p1_regret_sign_pure_IDDS p1_regret_sign_mm_8002 p1_regret_sign_mm_IDDS /// 
       p1_regret_sign_pure_mm_8002 p1_regret_sign_pure_mm_IDDS if num_subperiods==0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
 
 * regression in discrete time
 xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_8002 p1_regret_sign_IDDS ///
       p1_regret_sign_pure_mm p1_regret_sign_pure_8002 p1_regret_sign_pure_IDDS p1_regret_sign_mm_8002 p1_regret_sign_mm_IDDS /// 
       p1_regret_sign_pure_mm_8002 p1_regret_sign_pure_mm_IDDS if num_subperiods!=0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 * Column player learning
 * regression in continuous time
 xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sign_8002 p2_regret_sign_IDDS ///
       p2_regret_sign_pure_mm p2_regret_sign_pure_8002 p2_regret_sign_pure_IDDS p2_regret_sign_mm_8002 p2_regret_sign_mm_IDDS /// 
       p2_regret_sign_pure_mm_8002 p2_regret_sign_pure_mm_IDDS if num_subperiods==0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 * regression in discrete time
 xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sign_8002 p2_regret_sign_IDDS ///
       p2_regret_sign_pure_mm p2_regret_sign_pure_8002 p2_regret_sign_pure_IDDS p2_regret_sign_mm_8002 p2_regret_sign_mm_IDDS /// 
       p2_regret_sign_pure_mm_8002 p2_regret_sign_pure_mm_IDDS if num_subperiods!=0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+** Bootstrap method
+* Row player learning
+* regression in continuous time
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear
+xtset session_round_pair_id tick
+xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_8002 p1_regret_sign_IDDS ///
+      p1_regret_sign_pure_mm p1_regret_sign_pure_8002 p1_regret_sign_pure_IDDS p1_regret_sign_mm_8002 p1_regret_sign_mm_IDDS /// 
+      p1_regret_sign_pure_mm_8002 p1_regret_sign_pure_mm_IDDS if num_subperiods==0, fe vce(bootstrap)
+outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
+
+* regression in discrete time
+xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_8002 p1_regret_sign_IDDS ///
+      p1_regret_sign_pure_mm p1_regret_sign_pure_8002 p1_regret_sign_pure_IDDS p1_regret_sign_mm_8002 p1_regret_sign_mm_IDDS /// 
+      p1_regret_sign_pure_mm_8002 p1_regret_sign_pure_mm_IDDS if num_subperiods!=0, fe vce(bootstrap)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+* Column player learning
+* regression in continuous time
+xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sign_8002 p2_regret_sign_IDDS ///
+      p2_regret_sign_pure_mm p2_regret_sign_pure_8002 p2_regret_sign_pure_IDDS p2_regret_sign_mm_8002 p2_regret_sign_mm_IDDS /// 
+      p2_regret_sign_pure_mm_8002 p2_regret_sign_pure_mm_IDDS if num_subperiods==0, fe vce(bootstrap)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+* regression in discrete time
+xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sign_8002 p2_regret_sign_IDDS ///
+      p2_regret_sign_pure_mm p2_regret_sign_pure_8002 p2_regret_sign_pure_IDDS p2_regret_sign_mm_8002 p2_regret_sign_mm_IDDS /// 
+      p2_regret_sign_pure_mm_8002 p2_regret_sign_pure_mm_IDDS if num_subperiods!=0, fe vce(bootstrap)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
 **********BR learning**********
 * add independent variables
-use "/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/stata/mp_production.dta", clear
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear
 
 gen p1_direction_pure = p1_direction * dummy_pure
 gen p1_direction_mm = p1_direction * dummy_mm
@@ -150,31 +180,31 @@ xtset session_round_pair_id tick
 xtreg p1_diff p1_direction p1_direction_pure p1_direction_mm p1_direction_8002 p1_direction_IDDS ///
       p1_direction_pure_mm p1_direction_pure_8002 p1_direction_pure_IDDS p1_direction_mm_8002 p1_direction_mm_IDDS /// 
       p1_direction_pure_mm_8002 p1_direction_pure_mm_IDDS if num_subperiods==0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
 
 * regression in discrete time
 xtreg p1_diff p1_direction p1_direction_pure p1_direction_mm p1_direction_8002 p1_direction_IDDS ///
       p1_direction_pure_mm p1_direction_pure_8002 p1_direction_pure_IDDS p1_direction_mm_8002 p1_direction_mm_IDDS /// 
       p1_direction_pure_mm_8002 p1_direction_pure_mm_IDDS if num_subperiods!=0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 * Column player learning
 * regression in continuous time
 xtreg p2_diff p2_direction p2_direction_pure p2_direction_mm p2_direction_8002 p2_direction_IDDS ///
       p2_direction_pure_mm p2_direction_pure_8002 p2_direction_pure_IDDS p2_direction_mm_8002 p2_direction_mm_IDDS /// 
       p2_direction_pure_mm_8002 p2_direction_pure_mm_IDDS if num_subperiods==0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 * regression in discrete time
 xtreg p2_diff p2_direction p2_direction_pure p2_direction_mm p2_direction_8002 p2_direction_IDDS ///
       p2_direction_pure_mm p2_direction_pure_8002 p2_direction_pure_IDDS p2_direction_mm_8002 p2_direction_mm_IDDS /// 
       p2_direction_pure_mm_8002 p2_direction_pure_mm_IDDS if num_subperiods!=0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
 **********Pure directional learning**********
 * add independent variables
-use "/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/stata/mp_production.dta", clear
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear
 
 gen p1_sign_pure = p1_sign * dummy_pure
 gen p1_sign_mm = p1_sign * dummy_mm
@@ -206,30 +236,30 @@ xtset session_round_pair_id tick
 xtreg p1_diff p1_sign p1_sign_pure p1_sign_mm p1_sign_8002 p1_sign_IDDS ///
       p1_sign_pure_mm p1_sign_pure_8002 p1_sign_pure_IDDS p1_sign_mm_8002 p1_sign_mm_IDDS /// 
       p1_sign_pure_mm_8002 p1_sign_pure_mm_IDDS if num_subperiods==0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
 
 * regression in discrete time
 xtreg p1_diff p1_sign p1_sign_pure p1_sign_mm p1_sign_8002 p1_sign_IDDS ///
       p1_sign_pure_mm p1_sign_pure_8002 p1_sign_pure_IDDS p1_sign_mm_8002 p1_sign_mm_IDDS /// 
       p1_sign_pure_mm_8002 p1_sign_pure_mm_IDDS if num_subperiods!=0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 * Column player learning
 * regression in continuous time
 xtreg p2_diff p2_sign p2_sign_pure p2_sign_mm p2_sign_8002 p2_sign_IDDS ///
       p2_sign_pure_mm p2_sign_pure_8002 p2_sign_pure_IDDS p2_sign_mm_8002 p2_sign_mm_IDDS /// 
       p2_sign_pure_mm_8002 p2_sign_pure_mm_IDDS if num_subperiods==0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 * regression in discrete time
 xtreg p2_diff p2_sign p2_sign_pure p2_sign_mm p2_sign_8002 p2_sign_IDDS ///
       p2_sign_pure_mm p2_sign_pure_8002 p2_sign_pure_IDDS p2_sign_mm_8002 p2_sign_mm_IDDS /// 
       p2_sign_pure_mm_8002 p2_sign_pure_mm_IDDS if num_subperiods!=0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
 **********Directional learning with lagged regret terms**********
-use "/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/stata/mp_production.dta", clear
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear
 xtset session_round_pair_id tick
 
 * generate lag regret terms for row player
@@ -260,44 +290,44 @@ gen p2_regret_sign_L10 = L10.p2_regret_sign
 xtreg p1_diff p1_regret_sign p1_regret_sign_L1 p1_regret_sign_L2 ///
       p1_regret_sign_L3 p1_regret_sign_L4 p1_regret_sign_L5 ///
       if num_subperiods!=0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
 
 xtreg p1_diff p1_regret_sign p1_regret_sign_L1 p1_regret_sign_L2 ///
       p1_regret_sign_L3 p1_regret_sign_L4 p1_regret_sign_L5 ///
       if num_subperiods==0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 xtreg p2_diff p2_regret_sign p2_regret_sign_L1 p2_regret_sign_L2 ///
       p2_regret_sign_L3 p2_regret_sign_L4 p2_regret_sign_L5 ///
       if num_subperiods!=0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 xtreg p2_diff p2_regret_sign p2_regret_sign_L1 p2_regret_sign_L2 ///
       p2_regret_sign_L3 p2_regret_sign_L4 p2_regret_sign_L5 ///
       if num_subperiods==0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
-* regression with 2 lagged terms
+* regression with 1 lagged terms
 xtreg p1_diff p1_regret_sign p1_regret_sign_L1 ///
       if num_subperiods!=0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
 
 xtreg p1_diff p1_regret_sign p1_regret_sign_L1 ///
       if num_subperiods==0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 xtreg p2_diff p2_regret_sign p2_regret_sign_L1 ///
       if num_subperiods!=0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 xtreg p2_diff p2_regret_sign p2_regret_sign_L1 ///
       if num_subperiods==0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
-**********Directional learning with small, medium and large size**********
-use "/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/stata/mp_production.dta", clear
+**********Directional learning with discrete (small, medium, large) regret**********
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear
 xtset session_round_pair_id tick
 
 * reform the regret data
@@ -344,30 +374,30 @@ xtset session_round_pair_id tick
 xtreg p1_diff row_regret_sign row_regret_sign_pure row_regret_sign_mm row_regret_sign_8002 row_regret_sign_IDDS ///
       row_regret_sign_pure_mm row_regret_sign_pure_8002 row_regret_sign_pure_IDDS row_regret_sign_mm_8002 row_regret_sign_mm_IDDS /// 
       row_regret_sign_pure_mm_8002 row_regret_sign_pure_mm_IDDS if num_subperiods==0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
 
 * regression in discrete time
 xtreg p1_diff row_regret_sign row_regret_sign_pure row_regret_sign_mm row_regret_sign_8002 row_regret_sign_IDDS ///
       row_regret_sign_pure_mm row_regret_sign_pure_8002 row_regret_sign_pure_IDDS row_regret_sign_mm_8002 row_regret_sign_mm_IDDS /// 
       row_regret_sign_pure_mm_8002 row_regret_sign_pure_mm_IDDS if num_subperiods!=0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 * Column player learning
 * regression in continuous time
 xtreg p2_diff col_regret_sign col_regret_sign_pure col_regret_sign_mm col_regret_sign_8002 col_regret_sign_IDDS ///
       col_regret_sign_pure_mm col_regret_sign_pure_8002 col_regret_sign_pure_IDDS col_regret_sign_mm_8002 col_regret_sign_mm_IDDS /// 
       col_regret_sign_pure_mm_8002 col_regret_sign_pure_mm_IDDS if num_subperiods==0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 * regression in discrete time
 xtreg p2_diff col_regret_sign col_regret_sign_pure col_regret_sign_mm col_regret_sign_8002 col_regret_sign_IDDS ///
       col_regret_sign_pure_mm col_regret_sign_pure_8002 col_regret_sign_pure_IDDS col_regret_sign_mm_8002 col_regret_sign_mm_IDDS /// 
       col_regret_sign_pure_mm_8002 col_regret_sign_pure_mm_IDDS if num_subperiods!=0, fe vce(robust)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
 **********data summary table with mean_data (regression)**********
-use "/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/stata/mp_summary.dta", clear
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_summary.dta", clear
 
 * generate treatment dummies
 gen continuous = 0
@@ -394,41 +424,36 @@ gen continuous_pure_mm_g8002 = continuous * pure * mm * g8002
 * drop IDDS
 drop if game == 3
 
-* run regressions
+* regressions with cluster std error at pair level 
 reg Deviation_NE continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
     pure_mm pure_g8002 mm_g8002, vce(cluster session_id)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
 
 reg Deviation_MM continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
     pure_mm pure_g8002 mm_g8002, vce(cluster session_id)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 reg Deviation_Mid continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
     pure_mm pure_g8002 mm_g8002, vce(cluster session_id)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 reg sd_geometric continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
     pure_mm pure_g8002 mm_g8002, vce(cluster session_id)
-outreg2 using C:\Users\fenix\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
+* regressions with bootstrap
+reg Deviation_NE continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
+    pure_mm pure_g8002 mm_g8002, vce(bootstrap)
+outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
 
-**********data summary table with mean_data (ttest)**********
-use "/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/stata/mp_summary.dta", clear
+reg Deviation_MM continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
+    pure_mm pure_g8002 mm_g8002, vce(bootstrap)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
-* generate treatment dummies
-gen continuous = 0
-replace continuous = 1 if num_subperiods == 0
-gen pure = 0
-replace pure = 1 if pure_strategy == 1
-gen mm = 0
-replace mm = 1 if mean_matching == 1
+reg Deviation_Mid continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
+    pure_mm pure_g8002 mm_g8002, vce(bootstrap)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
-* ttest for AMPb game
-
-
-
-
-
-
-
-
+reg sd_geometric continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
+    pure_mm pure_g8002 mm_g8002, vce(bootstrap)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)

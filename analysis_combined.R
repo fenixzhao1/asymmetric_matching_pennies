@@ -70,40 +70,6 @@ for (i in 1:length(gametype)){
   
   for (j in 1:max(game_data$treatment2)){
     treatment_data = subset(game_data, treatment2 == j)
-    # 
-    # plot_data[[i]][j,1] = median(treatment_data$p1_strategy)
-    # plot_data[[i]][j,2] = sd(treatment_data$p1_strategy)
-    # plot_data[[i]][j,5] = median(treatment_data$p2_strategy)
-    # plot_data[[i]][j,6] = sd(treatment_data$p2_strategy)
-    # 
-    # # ttest p1 given NE
-    # test = t.test(treatment_data$p1_strategy, alternative = 'two.sided', 
-    #               mu = treatment_data$p1NEmix[1], conf.level = 0.95)
-    # plot_data[[i]][j,3] = round(test$p.value, digits = 3)
-    # 
-    # # ttest p1 given MM
-    # test = t.test(treatment_data$p1_strategy, alternative = 'two.sided', 
-    #               mu = treatment_data$p1MMmix[1], conf.level = 0.95)
-    # plot_data[[i]][j,4] = round(test$p.value, digits = 3)
-    # 
-    # # ttest p2 given NE
-    # test = t.test(treatment_data$p2_strategy, alternative = 'two.sided', 
-    #               mu = treatment_data$p2NEmix[1], conf.level = 0.95)
-    # plot_data[[i]][j,7] = round(test$p.value, digits = 3)
-    # 
-    # # ttest p2 given MM
-    # test = t.test(treatment_data$p2_strategy, alternative = 'two.sided', 
-    #               mu = treatment_data$p2MMmix[1], conf.level = 0.95)
-    # plot_data[[i]][j,8] = round(test$p.value, digits = 3)
-    # 
-    # # transfer matrix to data and add type
-    # plot_data[[i]] = data.frame(plot_data[[i]])
-    # plot_data[[i]]['type'] = rownames(plot_data[[i]])
-    # plot_data[[i]]['p1_lower'] = quantile(treatment_data$p1_strategy, 0.25)
-    # plot_data[[i]]['p1_upper'] = quantile(treatment_data$p1_strategy, 0.75)
-    # plot_data[[i]]['p2_lower'] = quantile(treatment_data$p2_strategy, 0.25)
-    # plot_data[[i]]['p2_upper'] = quantile(treatment_data$p2_strategy, 0.75)
-    
     
     # record median and sd for mean matching treatment
     if (treatment_data$mean_matching[1] == 'TRUE'){
@@ -128,7 +94,6 @@ for (i in 1:length(gametype)){
       
       plot_data[[i]] = data.frame(plot_data[[i]])
       plot_data[[i]]['type'] = rownames(plot_data[[i]])
-      
     }
     
     # record mean and sd for random pairwise treatment
@@ -150,27 +115,26 @@ for (i in 1:length(gametype)){
       mean_p1 = mean_p1[-1,]
       mean_p2 = mean_p2[-1,]
 
-      plot_data[[i]][j,1] = median(mean_p1)
-      plot_data[[i]][j,2] = sd(mean_p1)
-      plot_data[[i]][j,5] = median(mean_p2)
-      plot_data[[i]][j,6] = sd(mean_p2)
-      plot_data[[i]][j,9] = quantile(mean_p1, 0.25)
-      plot_data[[i]][j,10] = quantile(mean_p1, 0.75)
-      plot_data[[i]][j,11] = quantile(mean_p2, 0.25)
-      plot_data[[i]][j,12] = quantile(mean_p2, 0.75)
-      
-      # plot_data[[i]][j,1] = mean(mean_p1)
+      # plot_data[[i]][j,1] = median(mean_p1)
       # plot_data[[i]][j,2] = sd(mean_p1)
-      # plot_data[[i]][j,5] = mean(mean_p2)
+      # plot_data[[i]][j,5] = median(mean_p2)
       # plot_data[[i]][j,6] = sd(mean_p2)
-      # plot_data[[i]][j,9] = mean(mean_p1) - sd(mean_p1)
-      # plot_data[[i]][j,10] = mean(mean_p1) + sd(mean_p1)
-      # plot_data[[i]][j,11] = mean(mean_p2) - sd(mean_p2)
-      # plot_data[[i]][j,12] = mean(mean_p2) + sd(mean_p2)
+      # plot_data[[i]][j,9] = quantile(mean_p1, 0.25)
+      # plot_data[[i]][j,10] = quantile(mean_p1, 0.75)
+      # plot_data[[i]][j,11] = quantile(mean_p2, 0.25)
+      # plot_data[[i]][j,12] = quantile(mean_p2, 0.75)
+      
+      plot_data[[i]][j,1] = mean(mean_p1)
+      plot_data[[i]][j,2] = sd(mean_p1)
+      plot_data[[i]][j,5] = mean(mean_p2)
+      plot_data[[i]][j,6] = sd(mean_p2)
+      plot_data[[i]][j,9] = mean(mean_p1) - sd(mean_p1)
+      plot_data[[i]][j,10] = mean(mean_p1) + sd(mean_p1)
+      plot_data[[i]][j,11] = mean(mean_p2) - sd(mean_p2)
+      plot_data[[i]][j,12] = mean(mean_p2) + sd(mean_p2)
       
       plot_data[[i]] = data.frame(plot_data[[i]])
       plot_data[[i]]['type'] = rownames(plot_data[[i]])
-
     }
   }
   
@@ -204,12 +168,11 @@ for (i in 1:length(gametype)){
               legend.text = element_text(size = 15))
   
   print(pic)
-  
   dev.off()
 }
 
 
-##########Descriptive figure (not used): payoff heatmap and best response diagram for 8002##########
+##########Descriptive figure (not used): payoff heatmap and best response diagram for AMPa##########
 library(lattice)
 library(MASS)
 library(grid)
@@ -300,7 +263,7 @@ print(BRcolumn, vp = vplayout(2:4,4))
 dev.off()
 
 
-##########Descriptive figure (not used): payoff heatmap and MaxMin diagram for 8002##########
+##########Descriptive figure (not used): payoff heatmap and MaxMin diagram for AMPa##########
 # For the maxmin diagram, do it your favorite way, or if you don't have one, 
 # write row player's payoff function as f(p,q), where p= col mixing prob of L 
 # and q = row mixing prob of T. Then max-min diagram has q as horizontal axis 
@@ -1017,6 +980,20 @@ xtable(median_table[[3]],digits=3,caption="Distance to predictions.")
 
 
 ##########Table 3.5 and 4.5: Mean data by treatment (mean of mean)##########
+# keep the last 30 seconds
+#last_data = full_data
+rp_d = full_data %>% filter(mean_matching==FALSE & num_subperiods!=0) %>% 
+       mutate(last30 = ifelse(tick >= 10, 1, 0))
+rp_c = full_data %>% filter(mean_matching==FALSE & num_subperiods==0) %>% 
+       mutate(last30 = ifelse(tick >= 120, 1, 0))
+mm_d = full_data %>% filter(mean_matching==TRUE & num_subperiods!=0) %>% 
+       mutate(last30 = ifelse(tick >= 20, 1, 0))
+mm_c = full_data %>% filter(mean_matching==TRUE & num_subperiods==0) %>% 
+       mutate(last30 = ifelse(tick >= 240, 1, 0))
+last_data = rbind(rp_d, rp_c, mm_d, mm_c)
+last_data = filter(last_data, last30==1)
+rm(rp_d, rp_c, mm_d, mm_c)
+
 # create empty dataset
 length = rep(NA, length(uniqueID))
 mean_data = data.frame(session_round_id = length, p1_average = length, p2_average = length,
@@ -1028,7 +1005,7 @@ mean_data = data.frame(session_round_id = length, p1_average = length, p2_averag
 
 # loop over session_id(periods)
 for (i in 1:length(uniqueID)){
-  round_data = subset(full_data, session_round_id == uniqueID[i])
+  round_data = subset(last_data, session_round_id == uniqueID[i])
   
   # fill in the mean_data row i
   mean_data$session_id[i] = round_data$session_code[1]
@@ -1075,8 +1052,8 @@ mean_data = mean_data %>% mutate(sd_harmonic = (sd_p1 * sd_p2) / (sd_p1 + sd_p2)
 mean_data = mean_data %>% mutate(sd_geometric = sqrt(sd_p1 * sd_p2))
 
 # read qre data from gambit
-qre_8002 = read.csv("/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/gambit/qre_8002.csv", header = T)
-qre_3117 = read.csv("/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/gambit/qre_3117.csv", header = T)
+qre_8002 = read.csv("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/gambit/qre_8002.csv", header = T)
+qre_3117 = read.csv("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/gambit/qre_3117.csv", header = T)
 
 # add qre distance and optimal lambda
 mean_data = mean_data %>% mutate(lambda = 0)
