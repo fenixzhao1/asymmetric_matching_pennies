@@ -48,11 +48,13 @@ for(m in 1:length(full_data$tick)){
 full_data = full_data %>% mutate(game_new = ifelse(game == '8002','AMPa',ifelse(game == '3117', 'AMPb', 'IDDS')))
 gametype = unique(full_data$game_new)
 
+rm(merge_mm, merge_rp)
+
 # export dataset to stata
-write.dta(full_data, "/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/stata/mp_production.dta")
+write.dta(full_data, "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta")
 
 
-##########Figure 1 and Table 1: data summary chart and table by game##########
+##########Figure Table: data summary chart and table by game##########
 # create data container
 plot_data = list()
 
@@ -416,7 +418,7 @@ print(fullplot)
 dev.off()
 
 
-##########Table 2 (not used): Median data by treatment (median of mean, single observation)##########
+##########Table (not used): Median data by treatment (median of mean, single observation)##########
 # create empty dataset
 length = rep(NA, length(uniqueID))
 mean_data = data.frame(session_round_id = length, p1_average = length, p2_average = length,
@@ -627,7 +629,7 @@ for (i in 1:length(gametype)){
   dev.off()
 }
 
-##########Table 3 and 4: Median data by treatment (median of mean)##########
+##########Table: Median data by treatment (median of mean)##########
 # create empty dataset
 length = rep(NA, length(uniqueID))
 mean_data = data.frame(session_round_id = length, p1_average = length, p2_average = length,
@@ -979,7 +981,7 @@ xtable(median_table[[2]],digits=3,caption="Distance to predictions.")
 xtable(median_table[[3]],digits=3,caption="Distance to predictions.")
 
 
-##########Table 3.5 and 4.5: Mean data by treatment (mean of mean)##########
+##########Table: Mean data by treatment (mean of mean)##########
 # keep the last 30 seconds
 #last_data = full_data
 rp_d = full_data %>% filter(mean_matching==FALSE & num_subperiods!=0) %>% 
@@ -1366,7 +1368,156 @@ xtable(median_table[[2]],digits=3,caption="Distance to predictions.")
 xtable(median_table[[3]],digits=3,caption="Distance to predictions.")
 
 
-##########Table 5 (not used): Median of the means and compare it with median by games##########
+##########Table: Mean data by treatment with log likelihood at theoretical prediction ##########
+# keep the last 30 seconds
+last_data = full_data
+
+# create empty dataset
+length = rep(NA, length(uniqueID))
+mean_data = data.frame(session_id = length, session_round_id = length, 
+                       p1_average = length, p2_average = length,
+                       num_subperiods = length, pure_strategy = length, 
+                       mean_matching = length, game = length, 
+                       p1NEmix = length, p2NEmix = length, p1MMmix = length, p2MMmix = length, 
+                       treatment = length, treatment2 = length,
+                       ll_nash = length, ll_mm = length, ll_center = length, ll_mle = length)
+
+# loop over session_id(periods)
+for (i in 1:length(uniqueID)){
+  round_data = subset(last_data, session_round_id == uniqueID[i])
+  
+  # fill in the mean_data row i
+  mean_data$session_id[i] = round_data$session_code[1]
+  mean_data$session_round_id[i] = round_data$session_round_id[1]
+  mean_data$p1_average[i] = mean(round_data$p1_strategy)
+  mean_data$p2_average[i] = mean(round_data$p2_strategy)
+  mean_data$num_subperiods[i] = round_data$num_subperiods[1]
+  mean_data$pure_strategy[i] = round_data$pure_strategy[1]
+  mean_data$mean_matching[i] = round_data$mean_matching[1]
+  mean_data$game[i] = round_data$game[1]
+  mean_data$p1NEmix[i] = round_data$p1NEmix[1]
+  mean_data$p2NEmix[i] = round_data$p2NEmix[1]
+  mean_data$p1MMmix[i] = round_data$p1MMmix[1]
+  mean_data$p2MMmix[i] = round_data$p2MMmix[1]
+  mean_data$treatment[i] = round_data$treatment[1]
+  mean_data$treatment2[i] = round_data$treatment2[1]
+  
+  # fill in the loglikelihood wrt NE
+  mu1 = round_data$p1NEmix[1]
+  mu2 = round_data$p2NEmix[1]
+  sig1 = round_data$p1NEmix[1] * (1-round_data$p1NEmix[1])
+  sig2 = round_data$p2NEmix[1] * (1-round_data$p2NEmix[1])
+  x1 = mean(round_data$p1_strategy)
+  x2 = mean(round_data$p2_strategy)
+  pho = cor(round_data$p1_strategy, round_data$p2_strategy)
+  z = (x1-mu1)^2/(sig1^2) + (x2-mu2)^2/(sig2^2) - 2*pho*(x1-mu1)*(x2-mu2)/(sig1*sig2)
+  mean_data$ll_nash[i] = -z/(2*(1-pho^2)) - log(2*pi*sig1*sig2*sqrt(1-pho^2))
+  
+  # fill in the loglikelihood wrt MM
+  mu1 = round_data$p1MMmix[1]
+  mu2 = round_data$p2MMmix[1]
+  sig1 = round_data$p1MMmix[1] * (1-round_data$p1MMmix[1])
+  sig2 = round_data$p2MMmix[1] * (1-round_data$p2MMmix[1])
+  x1 = mean(round_data$p1_strategy)
+  x2 = mean(round_data$p2_strategy)
+  pho = cor(round_data$p1_strategy, round_data$p2_strategy)
+  z = (x1-mu1)^2/(sig1^2) + (x2-mu2)^2/(sig2^2) - 2*pho*(x1-mu1)*(x2-mu2)/(sig1*sig2)
+  mean_data$ll_mm[i] = -z/(2*(1-pho^2)) - log(2*pi*sig1*sig2*sqrt(1-pho^2))
+  
+  # fill in the loglikelihood wrt center
+  mu1 = 0.5
+  mu2 = 0.5
+  sig1 = 0.5 * (1-0.5)
+  sig2 = 0.5 * (1-0.5)
+  x1 = mean(round_data$p1_strategy)
+  x2 = mean(round_data$p2_strategy)
+  pho = cor(round_data$p1_strategy, round_data$p2_strategy)
+  z = (x1-mu1)^2/(sig1^2) + (x2-mu2)^2/(sig2^2) - 2*pho*(x1-mu1)*(x2-mu2)/(sig1*sig2)
+  mean_data$ll_center[i] = -z/(2*(1-pho^2)) - log(2*pi*sig1*sig2*sqrt(1-pho^2))
+  
+  # fill in the loglikelihood wrt sample mean
+  x1 = mean(round_data$p1_strategy)
+  x2 = mean(round_data$p2_strategy)
+  mu1 = x1
+  mu2 = x2
+  sig1 = x1 * (1-x1)
+  sig2 = x2 * (1-x2)
+  pho = cor(round_data$p1_strategy, round_data$p2_strategy)
+  z = (x1-mu1)^2/(sig1^2) + (x2-mu2)^2/(sig2^2) - 2*pho*(x1-mu1)*(x2-mu2)/(sig1*sig2)
+  mean_data$ll_mle[i] = -z/(2*(1-pho^2)) - log(2*pi*sig1*sig2*sqrt(1-pho^2))
+}
+
+mean_data = arrange(mean_data, session_round_id)
+
+# Generate the Table
+# drop IDDS
+mean_data = filter(mean_data, game != 3)
+
+# load package
+library(MASS)
+
+# create list
+median_table = list()
+
+# loop over game
+for (i in 1:length(gametype)){
+  game_data = subset(mean_data, game == i)
+  
+  median_table[[i]] = matrix(0, nrow = 6, ncol = 5)
+  rownames(median_table[[i]]) = c('mm', 'rp', 'Mixed', 'Pure', 'Continuous', 'Discrete')
+  colnames(median_table[[i]]) = c('ll wrt NE', 'll wrt Center', 'll wrt MM', 'll wrt mle', 'Num of Pairs')
+  
+  # mm vs rp
+  data1 = subset(game_data, mean_matching == TRUE)
+  median_table[[i]][1,1] = sum(data1$ll_nash)
+  median_table[[i]][1,2] = sum(data1$ll_center)
+  median_table[[i]][1,3] = sum(data1$ll_mm)
+  median_table[[i]][1,4] = sum(data1$ll_mle)
+  median_table[[i]][1,5] = length(data1$session_round_id)
+  
+  data2 = subset(game_data, mean_matching == FALSE)
+  median_table[[i]][2,1] = sum(data2$ll_nash)
+  median_table[[i]][2,2] = sum(data2$ll_center)
+  median_table[[i]][2,3] = sum(data2$ll_mm)
+  median_table[[i]][2,4] = sum(data2$ll_mle)
+  median_table[[i]][2,5] = length(data2$session_round_id)
+  
+  # mixed vs pure
+  data1 = subset(game_data, pure_strategy == FALSE)
+  median_table[[i]][3,1] = sum(data1$ll_nash)
+  median_table[[i]][3,2] = sum(data1$ll_center)
+  median_table[[i]][3,3] = sum(data1$ll_mm)
+  median_table[[i]][3,4] = sum(data1$ll_mle)
+  median_table[[i]][3,5] = length(data1$session_round_id)
+  
+  data2 = subset(game_data, pure_strategy == TRUE)
+  median_table[[i]][4,1] = sum(data2$ll_nash)
+  median_table[[i]][4,2] = sum(data2$ll_center)
+  median_table[[i]][4,3] = sum(data2$ll_mm)
+  median_table[[i]][4,4] = sum(data2$ll_mle)
+  median_table[[i]][4,5] = length(data2$session_round_id)
+  
+  # continuous vs discrete
+  data1 = subset(game_data, num_subperiods == 0)
+  median_table[[i]][5,1] = sum(data1$ll_nash)
+  median_table[[i]][5,2] = sum(data1$ll_center)
+  median_table[[i]][5,3] = sum(data1$ll_mm)
+  median_table[[i]][5,4] = sum(data1$ll_mle)
+  median_table[[i]][5,5] = length(data1$session_round_id)
+  
+  data2 = subset(game_data, num_subperiods != 0)
+  median_table[[i]][6,1] = sum(data2$ll_nash)
+  median_table[[i]][6,2] = sum(data2$ll_center)
+  median_table[[i]][6,3] = sum(data2$ll_mm)
+  median_table[[i]][6,4] = sum(data2$ll_mle)
+  median_table[[i]][6,5] = length(data2$session_round_id)
+}
+
+xtable(head(median_table[[1]]),digits=3,caption="Distance to predictions.")
+xtable(head(median_table[[2]]),digits=3,caption="Distance to predictions.")
+
+
+##########Table (not used): Median of the means and compare it with median by games##########
 # create empty dataset
 length = rep(NA, length(uniqueID))
 mean_data = data.frame(session_round_id = length, p1_average = length, p2_average = length,
@@ -1552,7 +1703,7 @@ xtable(median_table[[2]],digits=3,caption="Distance to predictions.")
 xtable(median_table[[3]],digits=3,caption="Distance to predictions.")
 
 
-##########Figure 2: Fitted regret-based learning model simulation##########
+##########Figure: Fitted regret-based learning model simulation##########
 learning_simulation = function(iteration, row_speed, column_speed, pure_indicator, step){
   
   # set simulation parameters
@@ -1866,7 +2017,7 @@ text(0.2,0.5,'MM',cex=1,pos=3,col="red")
 dev.off()
 
 
-##########Fiugre 2.5: Limited cycles simulation##########
+##########Fiugre: Limited cycles simulation##########
 # define figure title
 title = paste('limit cycle')
 file = paste("/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/production/supplement figures/DistanceNE/", title, sep = "")
@@ -2053,7 +2204,7 @@ for (j in 1:50){
 dev.off()
 
 
-##########Figure 3 (not used): Transition between 8002 and 3117##########
+##########Figure (not used): Transition between 8002 and 3117##########
 # create empty dataset
 length = rep(NA, length(uniqueID))
 mean_data = data.frame(round = length, p1_average = length, p2_average = length,
@@ -2110,7 +2261,7 @@ abline(v = 24.5)
 dev.off()
 
 
-##########Figure 4 (not used): Empirical switch rate##########
+##########Figure (not used): Empirical switch rate##########
 # calculate payoff differences
 full_data = full_data %>% mutate(p1_next_payoff = payoff1Aa*p1_strategy*p2_next + payoff1Ab*p1_strategy*(1-p2_next) + payoff1Ba*(1-p1_strategy)*p2_next + payoff1Bb*(1-p1_strategy)*(1-p2_next))
 full_data = full_data %>% mutate(p2_next_payoff = payoff2Aa*p1_next*p2_strategy + payoff2Ab*p1_next*(1-p2_strategy) + payoff2Ba*(1-p1_next)*p2_strategy + payoff2Bb*(1-p1_next)*(1-p2_strategy))
