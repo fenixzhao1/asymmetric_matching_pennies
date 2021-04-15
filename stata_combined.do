@@ -116,6 +116,7 @@ xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sig
       p2_regret_sign_pure_mm_8002 p2_regret_sign_pure_mm_IDDS if num_subperiods!=0, fe vce(robust)
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
+
 ** Bootstrap method
 * Row player learning
 * regression in continuous time
@@ -143,6 +144,68 @@ outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sign_8002 p2_regret_sign_IDDS ///
       p2_regret_sign_pure_mm p2_regret_sign_pure_8002 p2_regret_sign_pure_IDDS p2_regret_sign_mm_8002 p2_regret_sign_mm_IDDS /// 
       p2_regret_sign_pure_mm_8002 p2_regret_sign_pure_mm_IDDS if num_subperiods!=0, fe vce(bootstrap)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+
+** Bootstrap method without IDDS
+* Row player learning
+* regression in continuous time
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear
+drop if game_idds == 1
+xtset session_round_pair_id tick
+xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_8002 ///
+      p1_regret_sign_pure_mm p1_regret_sign_pure_8002 p1_regret_sign_mm_8002 /// 
+      p1_regret_sign_pure_mm_8002 if num_subperiods==0, fe vce(bootstrap)
+outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
+
+* regression in discrete time
+xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_8002 ///
+      p1_regret_sign_pure_mm p1_regret_sign_pure_8002 p1_regret_sign_mm_8002 /// 
+      p1_regret_sign_pure_mm_8002 if num_subperiods!=0, fe vce(bootstrap)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+* Column player learning
+* regression in continuous time
+xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sign_8002 ///
+      p2_regret_sign_pure_mm p2_regret_sign_pure_8002 p2_regret_sign_mm_8002 /// 
+      p2_regret_sign_pure_mm_8002 if num_subperiods==0, fe vce(bootstrap)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+* regression in discrete time
+xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sign_8002 ///
+      p2_regret_sign_pure_mm p2_regret_sign_pure_8002 p2_regret_sign_mm_8002 /// 
+      p2_regret_sign_pure_mm_8002 if num_subperiods!=0, fe vce(bootstrap)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+
+** Cluster std error without IDDS
+* Row player learning
+* regression in continuous time
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear
+drop if game_idds == 1
+xtset session_round_pair_id tick
+xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_8002 ///
+      p1_regret_sign_pure_mm p1_regret_sign_pure_8002 p1_regret_sign_mm_8002 /// 
+      p1_regret_sign_pure_mm_8002 if num_subperiods==0, fe vce(robust)
+outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
+
+* regression in discrete time
+xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_8002 ///
+      p1_regret_sign_pure_mm p1_regret_sign_pure_8002 p1_regret_sign_mm_8002 /// 
+      p1_regret_sign_pure_mm_8002 if num_subperiods!=0, fe vce(robust)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+* Column player learning
+* regression in continuous time
+xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sign_8002 ///
+      p2_regret_sign_pure_mm p2_regret_sign_pure_8002 p2_regret_sign_mm_8002 /// 
+      p2_regret_sign_pure_mm_8002 if num_subperiods==0, fe vce(robust)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+* regression in discrete time
+xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sign_8002 ///
+      p2_regret_sign_pure_mm p2_regret_sign_pure_8002 p2_regret_sign_mm_8002 /// 
+      p2_regret_sign_pure_mm_8002 if num_subperiods!=0, fe vce(robust)
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
@@ -424,7 +487,7 @@ gen continuous_pure_mm_g8002 = continuous * pure * mm * g8002
 * drop IDDS
 drop if game == 3
 
-* regressions with cluster std error at pair level 
+** regressions with cluster std error at pair level 
 reg Deviation_NE continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
     pure_mm pure_g8002 mm_g8002, vce(cluster session_id)
 outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
@@ -441,19 +504,43 @@ reg sd_geometric continuous pure mm g8002 continuous_pure continuous_mm continuo
     pure_mm pure_g8002 mm_g8002, vce(cluster session_id)
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
-* regressions with bootstrap
+
+** regressions with bootstrap
 reg Deviation_NE continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
     pure_mm pure_g8002 mm_g8002, vce(bootstrap)
+est store regne
 outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
 
 reg Deviation_MM continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
     pure_mm pure_g8002 mm_g8002, vce(bootstrap)
+est store regmm
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 reg Deviation_Mid continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
     pure_mm pure_g8002 mm_g8002, vce(bootstrap)
+est store regmid
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 reg sd_geometric continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
     pure_mm pure_g8002 mm_g8002, vce(bootstrap)
+est store regsd
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+
+** comparison of coefficients for the four bootstrap regression above
+reg Deviation_NE continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
+    pure_mm pure_g8002 mm_g8002
+est store regne
+reg Deviation_MM continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
+    pure_mm pure_g8002 mm_g8002
+est store regmm
+reg Deviation_Mid continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
+    pure_mm pure_g8002 mm_g8002
+est store regmid
+
+suest regne regmm regmid, vce(cluster session_id)
+test [regmm_mean]_cons = [regne_mean]_cons
+test [regne_mean]_cons = [regmid_mean]_cons, accum
+test [regne_mean]_cons = [regmid_mean]_cons
+test [regne_mean]_cons-[regne_mean]mm = [regmid_mean]_cons-[regmid_mean]mm
+

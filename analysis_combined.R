@@ -329,15 +329,13 @@ qre_precision = subset(qre_data, lambda<1)
 
 ## draw line charts showing precision functions wrt lambda
 title = '8002 game QRE precision'
-file = paste("/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/gambit/", title, sep = "")
+file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/gambit/", title, sep = "")
 file = paste(file, ".png", sep = "")
 png(file)
 
 plot(qre_precision$lambda, qre_precision$p1_row, col = "blue", ylim = c(0:1),
      type='l', xlab = "lambda", ylab = "equilibrium", main = 'QRE precision function')
-     
 lines(qre_precision$lambda, qre_precision$p2_row, col="red")
-
 legend('topright', legend = c('row', 'column'), fill = c('blue', 'red'))
 
 dev.off()
@@ -351,14 +349,12 @@ png(file)
 pic = ggplot() +
   
   geom_line(data = qre_precision, mapping = aes(x = p2_row, y = p1_row)) +
-  
   geom_text(aes(x = 0.2, y = 0.5,
                 label = 'NE'), vjust = 0, hjust = 0) +
   geom_text(aes(x = 0.5, y = 0.2,
                 label = 'MM'), vjust = 0, hjust = 0) +
   geom_text(aes(x = 0.5, y = 0.5,
                 label = 'Center'), vjust = 0, hjust = 0) +
-  
   ggtitle(title) +
   scale_x_continuous(name='column strategy', limits = c(0,1), breaks = seq(0,1,0.2)) +
   scale_y_continuous(name='row strategy', limits = c(0,1), breaks = seq(0,1,0.2)) +
@@ -983,18 +979,18 @@ xtable(median_table[[3]],digits=3,caption="Distance to predictions.")
 
 ##########Table: Mean data by treatment (mean of mean)##########
 # keep the last 30 seconds
-#last_data = full_data
-rp_d = full_data %>% filter(mean_matching==FALSE & num_subperiods!=0) %>% 
-       mutate(last30 = ifelse(tick >= 10, 1, 0))
-rp_c = full_data %>% filter(mean_matching==FALSE & num_subperiods==0) %>% 
-       mutate(last30 = ifelse(tick >= 120, 1, 0))
-mm_d = full_data %>% filter(mean_matching==TRUE & num_subperiods!=0) %>% 
-       mutate(last30 = ifelse(tick >= 20, 1, 0))
-mm_c = full_data %>% filter(mean_matching==TRUE & num_subperiods==0) %>% 
-       mutate(last30 = ifelse(tick >= 240, 1, 0))
-last_data = rbind(rp_d, rp_c, mm_d, mm_c)
-last_data = filter(last_data, last30==1)
-rm(rp_d, rp_c, mm_d, mm_c)
+last_data = full_data
+# rp_d = full_data %>% filter(mean_matching==FALSE & num_subperiods!=0) %>% 
+#        mutate(last30 = ifelse(tick >= 10, 1, 0))
+# rp_c = full_data %>% filter(mean_matching==FALSE & num_subperiods==0) %>% 
+#        mutate(last30 = ifelse(tick >= 120, 1, 0))
+# mm_d = full_data %>% filter(mean_matching==TRUE & num_subperiods!=0) %>% 
+#        mutate(last30 = ifelse(tick >= 20, 1, 0))
+# mm_c = full_data %>% filter(mean_matching==TRUE & num_subperiods==0) %>% 
+#        mutate(last30 = ifelse(tick >= 240, 1, 0))
+# last_data = rbind(rp_d, rp_c, mm_d, mm_c)
+# last_data = filter(last_data, last30==1)
+# rm(rp_d, rp_c, mm_d, mm_c)
 
 # create empty dataset
 length = rep(NA, length(uniqueID))
@@ -1052,6 +1048,13 @@ mean_data = mean_data %>% mutate(sd_mean = (sd_p1 + sd_p2) / 2)
 mean_data = mean_data %>% mutate(sd_square = sqrt(sd_p1^2 + sd_p2^2))
 mean_data = mean_data %>% mutate(sd_harmonic = (sd_p1 * sd_p2) / (sd_p1 + sd_p2))
 mean_data = mean_data %>% mutate(sd_geometric = sqrt(sd_p1 * sd_p2))
+mean_data = mean_data %>% mutate(
+  time = ifelse(num_subperiods==0, 'C', 'D'),
+  action = ifelse(pure_strategy==FALSE, 'M', 'P'),
+  match = ifelse(mean_matching==FALSE, 'rp', 'mm'),
+  game_new = ifelse(game==1, 'AMPb', ifelse(game==2, 'AMPa', 'IDDS')),
+  treat = paste(game_new, match, action, time, sep = '_')
+)
 
 # read qre data from gambit
 qre_8002 = read.csv("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/gambit/qre_8002.csv", header = T)
@@ -1366,6 +1369,131 @@ for (i in 1:length(gametype)){
 xtable(median_table[[1]],digits=3,caption="Distance to predictions.")
 xtable(median_table[[2]],digits=3,caption="Distance to predictions.")
 xtable(median_table[[3]],digits=3,caption="Distance to predictions.")
+
+
+##########Figure: time average scatter plot by games##########
+# keep the last 30 seconds
+last_data = full_data
+
+# create empty dataset
+length = rep(NA, length(uniqueID))
+mean_data = data.frame(session_round_id = length, p1_average = length, p2_average = length,
+                       p1_median = length, p2_median = length, p1_q1 = length, p2_q1 = length,
+                       p1_q3 = length, p2_q3 = length, sd_p1 = length, sd_p2 = length,
+                       num_subperiods = length, pure_strategy = length, mean_matching = length, game = length, 
+                       p1NEmix = length, p2NEmix = length, p1MMmix = length, p2MMmix = length, 
+                       p1_payoff = length, p2_payoff = length, treatment = length, treatment2 = length)
+
+# loop over session_id(periods)
+for (i in 1:length(uniqueID)){
+  round_data = subset(last_data, session_round_id == uniqueID[i])
+  
+  # fill in the mean_data row i
+  mean_data$session_id[i] = round_data$session_code[1]
+  mean_data$session_round_id[i] = round_data$session_round_id[1]
+  mean_data$p1_average[i] = mean(round_data$p1_strategy)
+  mean_data$p2_average[i] = mean(round_data$p2_strategy)
+  mean_data$p1_median[i] = median(round_data$p1_strategy)
+  mean_data$p2_median[i] = median(round_data$p2_strategy)
+  mean_data$p1_q1[i] = quantile(round_data$p1_strategy, 0.25)
+  mean_data$p1_q3[i] = quantile(round_data$p1_strategy, 0.75)
+  mean_data$p2_q1[i] = quantile(round_data$p2_strategy, 0.25)
+  mean_data$p2_q3[i] = quantile(round_data$p2_strategy, 0.75)
+  mean_data$sd_p1[i] = sd(round_data$p1_strategy)
+  mean_data$sd_p2[i] = sd(round_data$p2_strategy)
+  mean_data$num_subperiods[i] = round_data$num_subperiods[1]
+  mean_data$pure_strategy[i] = round_data$pure_strategy[1]
+  mean_data$mean_matching[i] = round_data$mean_matching[1]
+  mean_data$game[i] = round_data$game[1]
+  mean_data$p1NEmix[i] = round_data$p1NEmix[1]
+  mean_data$p2NEmix[i] = round_data$p2NEmix[1]
+  mean_data$p1MMmix[i] = round_data$p1MMmix[1]
+  mean_data$p2MMmix[i] = round_data$p2MMmix[1]
+  mean_data$p1_payoff[i] = mean(round_data$p1_payoff)
+  mean_data$p2_payoff[i] = mean(round_data$p2_payoff)
+  mean_data$treatment[i] = round_data$treatment[1]
+  mean_data$treatment2[i] = round_data$treatment2[1]
+}
+
+mean_data = arrange(mean_data, session_round_id)
+
+# add necessary variables
+mean_data = mean_data %>% mutate(
+  time = ifelse(num_subperiods==0, 'C', 'D'),
+  action = ifelse(pure_strategy==FALSE, 'M', 'P'),
+  match = ifelse(mean_matching==FALSE, 'rp', 'mm'),
+  game_new = ifelse(game==1, 'AMPb', ifelse(game==2, 'AMPa', 'IDDS')),
+  treat = paste(game_new, match, action, time, sep = '_')
+)
+
+# Generate scatter plot
+# loop over games
+for (i in 1:2){
+  game_data = subset(mean_data, game == i)
+  
+  # read qre curve info
+  if (i == 1){
+    qre_data = read.csv("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/gambit/qre_3117.csv", header = T)
+    qre_precision = subset(qre_data, lambda<2)
+    qre_precision = arrange(qre_precision, lambda)
+  }
+  else{
+    qre_data = read.csv("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/gambit/qre_8002.csv", header = T)
+    qre_precision = subset(qre_data, lambda<2)
+    qre_precision = arrange(qre_precision, lambda)
+  }
+  
+  # set title
+  title = paste('scatter_plot', as.character(game_data$game_new[1]), sep = '_')
+  file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/", title, sep = "")
+  file = paste(file, ".png", sep = "")
+  png(file, width = 600, height = 450)
+  
+  # scatter plot
+  pic = ggplot() +
+    geom_point(data = game_data, aes(x = p2_average, y = p1_average, color = treat)) +
+    geom_text(aes(x = game_data$p2NEmix[1], y = game_data$p1NEmix[1],
+                  label = 'NE'), vjust = 0, hjust = 0) +
+    geom_text(aes(x = game_data$p2MMmix[1], y = game_data$p1MMmix[1],
+                  label = 'MM'), vjust = 0, hjust = 0) +
+    geom_text(aes(x = 0.5, y = 0.5,
+                  label = 'Center'), vjust = 0, hjust = 0) +
+    geom_line(data = qre_precision, aes(x = p2_row, y = p1_row)) +
+    ggtitle(title) +
+    scale_x_continuous(name='column strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+    scale_y_continuous(name='row strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+    theme_bw() +
+    theme(plot.title = element_text(hjust = 0.5, size = 25),
+          axis.title.x = element_text(size = 20), axis.title.y = element_text(size = 20),
+          legend.text = element_text(size = 15))
+  
+  print(pic)
+  dev.off()
+}
+
+# seperately for IDDS
+game_data = subset(mean_data, game == 3)
+title = paste('scatter_plot', as.character(game_data$game_new[1]), sep = '_')
+file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/", title, sep = "")
+file = paste(file, ".png", sep = "")
+png(file, width = 600, height = 450)
+
+pic = ggplot() +
+  geom_point(data = game_data, aes(x = p2_average, y = p1_average, color = treat)) +
+  geom_text(aes(x = game_data$p2NEmix[1], y = game_data$p1NEmix[1],
+                label = 'NE'), vjust = 0, hjust = 0) +
+  geom_text(aes(x = 0.5, y = 0.5,
+                label = 'Center'), vjust = 0, hjust = 0) +
+  ggtitle(title) +
+  scale_x_continuous(name='column strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+  scale_y_continuous(name='row strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5, size = 25),
+        axis.title.x = element_text(size = 20), axis.title.y = element_text(size = 20),
+        legend.text = element_text(size = 15))
+
+print(pic)
+dev.off()
 
 
 ##########Table: Mean data by treatment with log likelihood at theoretical prediction ##########
@@ -1784,78 +1912,56 @@ learning_simulation = function(iteration, row_speed, column_speed, pure_indicato
   # draw figure of learning process
   simulation_data = data.frame(simulation_data)
   
-  #par(new=TRUE)
+  par(new=TRUE)
   
-  # # draw 3D plots
-  # if (j == 1){
-  #   # 3D plot by NE
-  #   plot3D::lines3D(simulation_data$row_strategy, simulation_data$column_strategy, iteration-simulation_data$iteration, col='blue', 
-  #                   xlab='row strategy', xlim=c(0:1),
-  #                   ylab='column strategy', ylim=c(0:1),
-  #                   zlab='time left',
-  #                   main = 'Simulation of fitted regret-based learning RP',
-  #                   theta=20, phi=30, r=2, d=1, bty='g')
-  #   plot3D::lines3D(rep(0.5, iteration), rep(0.2, iteration), iteration-simulation_data$iteration, col='black', add=TRUE)
-  #   plot3D::lines3D(rep(0.5, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='green', add=TRUE)
-  #   plot3D::lines3D(rep(0.2, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='red', add=TRUE)
-  #   
-  # }
-  # else{
-  #   # 3D plot by NE
-  #   plot3D::lines3D(simulation_data$row_strategy, simulation_data$column_strategy, iteration-simulation_data$iteration, col='blue', 
-  #                   xlab='row strategy', xlim=c(0:1),
-  #                   ylab='column strategy', ylim=c(0:1),
-  #                   zlab='time left',
-  #                   main = 'Simulation of fitted regret-based learning',
-  #                   theta=20, phi=30, r=2, d=1, bty='g', add=TRUE)
-  #   plot3D::lines3D(rep(0.5, iteration), rep(0.2, iteration), iteration-simulation_data$iteration, col='black', add=TRUE)
-  #   plot3D::lines3D(rep(0.5, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='green', add=TRUE)
-  #   plot3D::lines3D(rep(0.2, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='red', add=TRUE)
-  # }
+  # draw 3D plots
+  if (j == 1){
+    # 3D plot by NE
+    plot3D::lines3D(simulation_data$row_strategy, simulation_data$column_strategy, iteration-simulation_data$iteration, col='blue',
+                    xlab='row strategy', xlim=c(0:1),
+                    ylab='column strategy', ylim=c(0:1),
+                    zlab='time left',
+                    main = 'Simulation of fitted regret-based learning RP',
+                    theta=20, phi=30, r=2, d=1, bty='g')
+    plot3D::lines3D(rep(0.5, iteration), rep(0.2, iteration), iteration-simulation_data$iteration, col='black', add=TRUE)
+    plot3D::lines3D(rep(0.5, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='green', add=TRUE)
+    plot3D::lines3D(rep(0.2, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='red', add=TRUE)
+
+  }
+  else{
+    # 3D plot by NE
+    plot3D::lines3D(simulation_data$row_strategy, simulation_data$column_strategy, iteration-simulation_data$iteration, col='blue',
+                    xlab='row strategy', xlim=c(0:1),
+                    ylab='column strategy', ylim=c(0:1),
+                    zlab='time left',
+                    main = 'Simulation of fitted regret-based learning RP',
+                    theta=20, phi=30, r=2, d=1, bty='g', add=TRUE)
+    plot3D::lines3D(rep(0.5, iteration), rep(0.2, iteration), iteration-simulation_data$iteration, col='black', add=TRUE)
+    plot3D::lines3D(rep(0.5, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='green', add=TRUE)
+    plot3D::lines3D(rep(0.2, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='red', add=TRUE)
+  }
   
   # # try 2D plots
   # plot(simulation_data$row_strategy, simulation_data$column_strategy,
   #      xlab='row strategy', xlim=c(0:1),
   #      ylab='column strategy', ylim=c(0:1),
   #      main = 'Simulation of fitted regret-based learning', type = 'l', cex = 1.5)
-  
-  # # calculate deviation to Nash
-  # plot(simulation_data$to_ne, type = 'l', col = 'blue',
-  #      xlab = 'iteration', ylab = 'Deviation to NE', ylim = c(-0.2:1),
-  #      main = 'Deviation to NE')
-  # lines(simulation_data$delta, type = 'l', col = 'red', ylim = c(-0.2:1))
-  
-  # plot the distance when the trajectory crosses the isoline (0.5, >0.2)
-  # tripwire_data = subset(simulation_data, column_strategy < 0.2)
-  # tripwire_data = subset(tripwire_data, (row_strategy - 0.5)*(row_next - 0.5) <= 0)
-  
-  tripwire_data = subset(simulation_data, row_strategy > 0.5)
-  tripwire_data = subset(tripwire_data, (column_strategy - 0.2)*(column_next - 0.2) <= 0)
-  
-  plot(tripwire_data$to_ne, type = 'l', col = 'blue',
-       xlab = 'time', ylab = 'Deviation to NE', ylim = c(-0.2:1),
-       main = 'Deviation to NE')
-  lines(tripwire_data$delta, type = 'l', col = 'red', ylim = c(-0.2:1))
-  
 }
 
 # run the simulation
-times = 5
+title = paste('Simulation3D AMPa RP C M')
+file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/sims/", title, sep = "")
+file = paste(file, ".png", sep = "")
+png(file, width = 500, height = 500)
 
-for (j in 1:times){
-  
-  title = paste('Distance to NE simulation MCrp 2d p up', as.character(j))
-  file = paste("/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/production/supplement figures/DistanceNE/", title, sep = "")
-  file = paste(file, ".png", sep = "")
-  png(file, width = 1000, height = 400)
-  
-  learning_simulation(5000, 0.12, 0.26, 0, 1)
-  
-  dev.off()
+for (j in 1:10){
+  learning_simulation(300, 0.12, 0.26, 0, 1)
 }
 
 # text(0.5,0.2,'NE',cex=1,pos=3,col="blue")
 # text(0.2,0.5,'MM',cex=1,pos=3,col="red")
+
+dev.off()
 
 
 # Building simulation in meanmatching
@@ -1965,50 +2071,47 @@ learning_simulation_meanmatching = function(iteration, row_speed, column_speed, 
   
   par(new=TRUE)
   
-  # if (k == 1){
-  #   # 3D plot by NE
-  #   plot3D::lines3D(simulation_data$row_strategy, simulation_data$column_strategy, iteration-simulation_data$iteration, col='blue', 
-  #                   xlab='row strategy', xlim=c(0:1),
-  #                   ylab='column strategy', ylim=c(0:1),
-  #                   zlab='time left',
-  #                   main = 'Simulation of fitted regret-based learning MM',
-  #                   theta=20, phi=30, r=2, d=1, bty='g')
-  #   plot3D::lines3D(rep(0.5, iteration), rep(0.2, iteration), iteration-simulation_data$iteration, col='black', add=TRUE)
-  #   plot3D::lines3D(rep(0.5, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='green', add=TRUE)
-  #   plot3D::lines3D(rep(0.2, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='red', add=TRUE)
-  #   
-  # }
-  # else{
-  #   # 3D plot by NE
-  #   plot3D::lines3D(simulation_data$row_strategy, simulation_data$column_strategy, iteration-simulation_data$iteration, col='blue', 
-  #                   xlab='row strategy', xlim=c(0:1),
-  #                   ylab='column strategy', ylim=c(0:1),
-  #                   zlab='time left',
-  #                   main = 'Simulation of fitted regret-based learning',
-  #                   theta=20, phi=30, r=2, d=1, bty='g', add=TRUE)
-  #   plot3D::lines3D(rep(0.5, iteration), rep(0.2, iteration), iteration-simulation_data$iteration, col='black', add=TRUE)
-  #   plot3D::lines3D(rep(0.5, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='green', add=TRUE)
-  #   plot3D::lines3D(rep(0.2, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='red', add=TRUE)
-  # }
+  if (k == 1){
+    # 3D plot by NE
+    plot3D::lines3D(simulation_data$row_strategy, simulation_data$column_strategy, iteration-simulation_data$iteration, col='blue',
+                    xlab='row strategy', xlim=c(0:1),
+                    ylab='column strategy', ylim=c(0:1),
+                    zlab='time left',
+                    main = 'Simulation of fitted regret-based learning MM',
+                    theta=20, phi=30, r=2, d=1, bty='g')
+    plot3D::lines3D(rep(0.5, iteration), rep(0.2, iteration), iteration-simulation_data$iteration, col='black', add=TRUE)
+    plot3D::lines3D(rep(0.5, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='green', add=TRUE)
+    plot3D::lines3D(rep(0.2, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='red', add=TRUE)
+
+  }
+  else{
+    # 3D plot by NE
+    plot3D::lines3D(simulation_data$row_strategy, simulation_data$column_strategy, iteration-simulation_data$iteration, col='blue',
+                    xlab='row strategy', xlim=c(0:1),
+                    ylab='column strategy', ylim=c(0:1),
+                    zlab='time left',
+                    main = 'Simulation of fitted regret-based learning',
+                    theta=20, phi=30, r=2, d=1, bty='g', add=TRUE)
+    plot3D::lines3D(rep(0.5, iteration), rep(0.2, iteration), iteration-simulation_data$iteration, col='black', add=TRUE)
+    plot3D::lines3D(rep(0.5, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='green', add=TRUE)
+    plot3D::lines3D(rep(0.2, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='red', add=TRUE)
+  }
   
-  # try 2D plots
-  plot(simulation_data$row_strategy, simulation_data$column_strategy,
-       xlab='row strategy', xlim=c(0:1),
-       ylab='column strategy', ylim=c(0:1),
-       main = 'Simulation of fitted regret-based learning', type = 'l')
-  
+  # # try 2D plots
+  # plot(simulation_data$row_strategy, simulation_data$column_strategy,
+  #      xlab='row strategy', xlim=c(0:1),
+  #      ylab='column strategy', ylim=c(0:1),
+  #      main = 'Simulation of fitted regret-based learning', type = 'l')
 }
 
 # run the simulation
-times = 10
-
-title = 'test simulation mean matching mixed'
-file = paste("/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/production/supplement figures/", title, sep = "")
+title = paste('Simulation3D AMPa MM C P')
+file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/sims/", title, sep = "")
 file = paste(file, ".png", sep = "")
-png(file, width = 600, height = 600)
+png(file, width = 500, height = 500)
 
-for (j in 1:times){
-  learning_simulation_meanmatching(10000, 0.01, 0.01, 0, 6, j)
+for (j in 1:10){
+  learning_simulation_meanmatching(300, 0.12, 0.26, 1, 6, j)
 }
 
 text(0.5,0.2,'NE',cex=1,pos=3,col="blue")
