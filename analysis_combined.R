@@ -44,9 +44,18 @@ for(m in 1:length(full_data$tick)){
   if (full_data$mean_matching[m]=='TRUE' & full_data$MC[m]==1){full_data$treatment2[m] = 8}
 }
 
-# change game name
-full_data = full_data %>% mutate(game_new = ifelse(game == '8002','AMPa',ifelse(game == '3117', 'AMPb', 'IDDS')))
+# create a new treatment variable combining all treatments
+full_data = full_data %>% mutate(
+  game_new = ifelse(game=='8002', 'AMPa', ifelse(game=='3117', 'AMPb', 'IDDS')),
+  time = ifelse(num_subperiods==0, 'continuous', 'discrete'),
+  match = ifelse(mean_matching==TRUE, 'mm', 'rp'),
+  actionsets = ifelse(pure_strategy==TRUE, 'pure', 'mixed'),
+  treatmentfull = paste(game_new, actionsets, time, match, sep = '_')
+)
+
+# set up unique parameters
 gametype = unique(full_data$game_new)
+treatmenttype = unique(full_data$treatmentfull)
 
 rm(merge_mm, merge_rp)
 
@@ -1372,11 +1381,9 @@ xtable(median_table[[3]],digits=3,caption="Distance to predictions.")
 
 
 ##########Figure: time average scatter plot by games##########
-# keep the last 30 seconds
-last_data = full_data
-
 # create empty dataset
-length = rep(NA, length(uniqueID))
+#length = rep(NA, length(uniqueID))
+length = rep(NA, length(treatmenttype))
 mean_data = data.frame(session_round_id = length, p1_average = length, p2_average = length,
                        p1_median = length, p2_median = length, p1_q1 = length, p2_q1 = length,
                        p1_q3 = length, p2_q3 = length, sd_p1 = length, sd_p2 = length,
@@ -1384,9 +1391,11 @@ mean_data = data.frame(session_round_id = length, p1_average = length, p2_averag
                        p1NEmix = length, p2NEmix = length, p1MMmix = length, p2MMmix = length, 
                        p1_payoff = length, p2_payoff = length, treatment = length, treatment2 = length)
 
-# loop over session_id(periods)
-for (i in 1:length(uniqueID)){
-  round_data = subset(last_data, session_round_id == uniqueID[i])
+# loop over session_id(periods)/treatments
+#for (i in 1:length(uniqueID)){
+  #round_data = filter(full_data, session_round_id == uniqueID[i])
+for (i in 1:length(treatmenttype)){
+  round_data = filter(full_data, treatmentfull == treatmenttype[i])
   
   # fill in the mean_data row i
   mean_data$session_id[i] = round_data$session_code[1]
@@ -1428,78 +1437,127 @@ mean_data = mean_data %>% mutate(
 
 # Generate scatter plot
 # loop over games
-for (i in 1:2){
-  game_data = subset(mean_data, game == i)
+for (i in 1:length(gametype)){
+  game_data = subset(mean_data, game_new == gametype[i])
   
-  # read qre curve info
-  if (i == 1){
+  # AMPb game
+  if (gametype[i] == 'AMPb'){
+    # read qre info
     qre_data = read.csv("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/gambit/qre_3117.csv", header = T)
     qre_precision = subset(qre_data, lambda<2)
     qre_precision = arrange(qre_precision, lambda)
+    
+    # add RDCE data
+    rec1 = data.frame(pmin=0, pmax=0.33, qmin=0.5, qmax=0.75)
+    rec2 = data.frame(pmin=0.33, pmax=0.5, qmin=0, qmax=0.5)
+    
+    # set title
+    title = paste('scatter_plot', as.character(game_data$game_new[1]), sep = '_')
+    file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/", title, sep = "")
+    file = paste(file, ".png", sep = "")
+    png(file, width = 600, height = 450)
+    
+    # scatter plot
+    pic = ggplot() +
+      geom_rect(mapping = aes(xmin = 0.5, ymin = 0, xmax = 0.75, ymax = 0.33), 
+                color = 'azure2', fill = 'azure2', alpha = 0.5, size = 1.5) +
+      geom_rect(mapping = aes(xmin = 0, ymin = 0.33, xmax = 0.5, ymax = 0.5), 
+                color = 'azure2', fill = 'azure2', alpha = 0.5, size = 1.5) +
+      geom_point(data = game_data, aes(x = p2_average, y = p1_average, color = treat), size=3) +
+      geom_text(aes(x = game_data$p2NEmix[1], y = game_data$p1NEmix[1],
+                    label = 'NE'), vjust = 0, hjust = 0) +
+      geom_text(aes(x = game_data$p2MMmix[1], y = game_data$p1MMmix[1],
+                    label = 'MM'), vjust = 0, hjust = 0) +
+      geom_text(aes(x = 0.5, y = 0.5,
+                    label = 'Center'), vjust = 0, hjust = 0) +
+      #geom_line(data = qre_precision, aes(x = p2_row, y = p1_row)) +
+      ggtitle(title) +
+      scale_x_continuous(name='column strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+      scale_y_continuous(name='row strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+      theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5, size = 25),
+            axis.title.x = element_text(size = 20), axis.title.y = element_text(size = 20),
+            legend.text = element_text(size = 15))
+    
+    print(pic)
+    dev.off()
   }
-  else{
+  
+  # AMPa game
+  else if (gametype[i] == 'AMPa'){
+    # read qre info
     qre_data = read.csv("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/gambit/qre_8002.csv", header = T)
     qre_precision = subset(qre_data, lambda<2)
     qre_precision = arrange(qre_precision, lambda)
+    
+    # add RDCE data
+    rec1 = data.frame(pmin=0.5, pmax=1, qmin=0.2, qmax=0.5)
+    
+    # set title
+    title = paste('scatter_plot', as.character(game_data$game_new[1]), sep = '_')
+    file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/", title, sep = "")
+    file = paste(file, ".png", sep = "")
+    png(file, width = 600, height = 450)
+    
+    # scatter plot
+    pic = ggplot() +
+      geom_rect(mapping = aes(xmin = 0.2, ymin = 0.5, xmax = 0.5, ymax = 1), 
+                color = 'azure2', fill = 'azure2', alpha = 0.5, size = 1.5) +
+      geom_point(data = game_data, aes(x = p2_average, y = p1_average, color = treat), size=3) +
+      geom_text(aes(x = game_data$p2NEmix[1], y = game_data$p1NEmix[1],
+                    label = 'NE'), vjust = 0, hjust = 0) +
+      geom_text(aes(x = game_data$p2MMmix[1], y = game_data$p1MMmix[1],
+                    label = 'MM'), vjust = 0, hjust = 0) +
+      geom_text(aes(x = 0.5, y = 0.5,
+                    label = 'Center'), vjust = 0, hjust = 0) +
+      #geom_line(data = qre_precision, aes(x = p2_row, y = p1_row)) +
+      ggtitle(title) +
+      scale_x_continuous(name='column strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+      scale_y_continuous(name='row strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+      theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5, size = 25),
+            axis.title.x = element_text(size = 20), axis.title.y = element_text(size = 20),
+            legend.text = element_text(size = 15))
+    
+    print(pic)
+    dev.off()
   }
   
-  # set title
-  title = paste('scatter_plot', as.character(game_data$game_new[1]), sep = '_')
-  file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/", title, sep = "")
-  file = paste(file, ".png", sep = "")
-  png(file, width = 600, height = 450)
-  
-  # scatter plot
-  pic = ggplot() +
-    geom_point(data = game_data, aes(x = p2_average, y = p1_average, color = treat)) +
-    geom_text(aes(x = game_data$p2NEmix[1], y = game_data$p1NEmix[1],
-                  label = 'NE'), vjust = 0, hjust = 0) +
-    geom_text(aes(x = game_data$p2MMmix[1], y = game_data$p1MMmix[1],
-                  label = 'MM'), vjust = 0, hjust = 0) +
-    geom_text(aes(x = 0.5, y = 0.5,
-                  label = 'Center'), vjust = 0, hjust = 0) +
-    geom_line(data = qre_precision, aes(x = p2_row, y = p1_row)) +
-    ggtitle(title) +
-    scale_x_continuous(name='column strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
-    scale_y_continuous(name='row strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
-    theme_bw() +
-    theme(plot.title = element_text(hjust = 0.5, size = 25),
-          axis.title.x = element_text(size = 20), axis.title.y = element_text(size = 20),
-          legend.text = element_text(size = 15))
-  
-  print(pic)
-  dev.off()
+  # IDDS game
+  else{
+    # set title
+    title = paste('scatter_plot', as.character(game_data$game_new[1]), sep = '_')
+    file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/", title, sep = "")
+    file = paste(file, ".png", sep = "")
+    png(file, width = 600, height = 450)
+    
+    # add RDCE data
+    rec1 = data.frame(pmin=0, pmax=0.5, qmin=0.5, qmax=1)
+    
+    # scatter plot
+    pic = ggplot() +
+      geom_rect(mapping = aes(xmin = 0.5, ymin = 0, xmax = 1, ymax = 0.5), 
+                color = 'azure2', fill = 'azure2', alpha = 0.5, size = 1.5) +
+      geom_point(data = game_data, aes(x = p2_average, y = p1_average, color = treat), size=3) +
+      geom_text(aes(x = game_data$p2NEmix[1], y = game_data$p1NEmix[1],
+                    label = 'NE'), vjust = 0, hjust = 0) +
+      geom_text(aes(x = 0.5, y = 0.5,
+                    label = 'Center'), vjust = 0, hjust = 0) +
+      ggtitle(title) +
+      scale_x_continuous(name='column strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+      scale_y_continuous(name='row strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+      theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5, size = 25),
+            axis.title.x = element_text(size = 20), axis.title.y = element_text(size = 20),
+            legend.text = element_text(size = 15))
+    
+    print(pic)
+    dev.off()
+  }
 }
-
-# seperately for IDDS
-game_data = subset(mean_data, game == 3)
-title = paste('scatter_plot', as.character(game_data$game_new[1]), sep = '_')
-file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/", title, sep = "")
-file = paste(file, ".png", sep = "")
-png(file, width = 600, height = 450)
-
-pic = ggplot() +
-  geom_point(data = game_data, aes(x = p2_average, y = p1_average, color = treat)) +
-  geom_text(aes(x = game_data$p2NEmix[1], y = game_data$p1NEmix[1],
-                label = 'NE'), vjust = 0, hjust = 0) +
-  geom_text(aes(x = 0.5, y = 0.5,
-                label = 'Center'), vjust = 0, hjust = 0) +
-  ggtitle(title) +
-  scale_x_continuous(name='column strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
-  scale_y_continuous(name='row strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5, size = 25),
-        axis.title.x = element_text(size = 20), axis.title.y = element_text(size = 20),
-        legend.text = element_text(size = 15))
-
-print(pic)
-dev.off()
 
 
 ##########Table: Mean data by treatment with log likelihood at theoretical prediction ##########
-# keep the last 30 seconds
-last_data = full_data
-
 # create empty dataset
 length = rep(NA, length(uniqueID))
 mean_data = data.frame(session_id = length, session_round_id = length, 
@@ -1512,7 +1570,7 @@ mean_data = data.frame(session_id = length, session_round_id = length,
 
 # loop over session_id(periods)
 for (i in 1:length(uniqueID)){
-  round_data = subset(last_data, session_round_id == uniqueID[i])
+  round_data = subset(full_data, session_round_id == uniqueID[i])
   
   # fill in the mean_data row i
   mean_data$session_id[i] = round_data$session_code[1]
@@ -1537,7 +1595,7 @@ for (i in 1:length(uniqueID)){
   sig2 = round_data$p2NEmix[1] * (1-round_data$p2NEmix[1])
   x1 = mean(round_data$p1_strategy)
   x2 = mean(round_data$p2_strategy)
-  pho = cor(round_data$p1_strategy, round_data$p2_strategy)
+  pho = 0
   z = (x1-mu1)^2/(sig1^2) + (x2-mu2)^2/(sig2^2) - 2*pho*(x1-mu1)*(x2-mu2)/(sig1*sig2)
   mean_data$ll_nash[i] = -z/(2*(1-pho^2)) - log(2*pi*sig1*sig2*sqrt(1-pho^2))
   
@@ -1548,7 +1606,7 @@ for (i in 1:length(uniqueID)){
   sig2 = round_data$p2MMmix[1] * (1-round_data$p2MMmix[1])
   x1 = mean(round_data$p1_strategy)
   x2 = mean(round_data$p2_strategy)
-  pho = cor(round_data$p1_strategy, round_data$p2_strategy)
+  pho = 0
   z = (x1-mu1)^2/(sig1^2) + (x2-mu2)^2/(sig2^2) - 2*pho*(x1-mu1)*(x2-mu2)/(sig1*sig2)
   mean_data$ll_mm[i] = -z/(2*(1-pho^2)) - log(2*pi*sig1*sig2*sqrt(1-pho^2))
   
@@ -1559,7 +1617,7 @@ for (i in 1:length(uniqueID)){
   sig2 = 0.5 * (1-0.5)
   x1 = mean(round_data$p1_strategy)
   x2 = mean(round_data$p2_strategy)
-  pho = cor(round_data$p1_strategy, round_data$p2_strategy)
+  pho = 0
   z = (x1-mu1)^2/(sig1^2) + (x2-mu2)^2/(sig2^2) - 2*pho*(x1-mu1)*(x2-mu2)/(sig1*sig2)
   mean_data$ll_center[i] = -z/(2*(1-pho^2)) - log(2*pi*sig1*sig2*sqrt(1-pho^2))
   
