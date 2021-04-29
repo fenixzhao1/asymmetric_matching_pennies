@@ -209,6 +209,65 @@ xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sig
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
+**********Directional learning (combine C and D treatments)**********
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear
+drop if game_idds == 1
+
+* rescale regret terms by time treatments
+gen p1_regret_sign_scale = p1_regret_sign
+*replace p1_regret_sign_scale = p1_regret_sign / 2 if num_subperiods == 0
+*replace p1_regret_sign_scale = p1_regret_sign * 6 if num_subperiods != 0
+gen p2_regret_sign_scale = p2_regret_sign
+*replace p2_regret_sign_scale = p2_regret_sign / 2 if num_subperiods == 0
+*replace p2_regret_sign_scale = p2_regret_sign * 6 if num_subperiods != 0
+
+* gen interactive dummies for p1
+gen p1_continuous = p1_regret_sign_scale * dummy_continuous
+gen p1_pure = p1_regret_sign_scale * dummy_pure
+gen p1_mm = p1_regret_sign_scale * dummy_mm
+gen p1_AMPa = p1_regret_sign_scale * dummy_8002
+gen p1_continuous_pure = p1_regret_sign_scale * dummy_continuous * dummy_pure
+gen p1_continuous_mm = p1_regret_sign_scale * dummy_continuous * dummy_mm
+gen p1_continuous_AMPa = p1_regret_sign_scale * dummy_continuous * dummy_8002
+gen p1_pure_mm = p1_regret_sign_scale * dummy_pure * dummy_mm
+gen p1_pure_AMPa = p1_regret_sign_scale * dummy_pure * dummy_8002
+gen p1_mm_AMPa = p1_regret_sign_scale * dummy_mm * dummy_8002
+
+* gen interactive dummies for p2
+gen p2_continuous = p2_regret_sign_scale * dummy_continuous
+gen p2_pure = p2_regret_sign_scale * dummy_pure
+gen p2_mm = p2_regret_sign_scale * dummy_mm
+gen p2_AMPa = p2_regret_sign_scale * dummy_8002
+gen p2_continuous_pure = p2_regret_sign_scale * dummy_continuous * dummy_pure
+gen p2_continuous_mm = p2_regret_sign_scale * dummy_continuous * dummy_mm
+gen p2_continuous_AMPa = p2_regret_sign_scale * dummy_continuous * dummy_8002
+gen p2_pure_mm = p2_regret_sign_scale * dummy_pure * dummy_mm
+gen p2_pure_AMPa = p2_regret_sign_scale * dummy_pure * dummy_8002
+gen p2_mm_AMPa = p2_regret_sign_scale * dummy_mm * dummy_8002
+
+* run regressions
+xtset session_round_pair_id tick
+xtreg p1_diff p1_regret_sign_scale p1_continuous p1_pure p1_mm p1_AMPa ///
+      p1_continuous_pure p1_continuous_mm p1_continuous_AMPa ///
+	  p1_pure_mm p1_pure_AMPa p1_mm_AMPa, fe vce(robust)
+outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
+
+xtreg p1_diff p1_regret_sign_scale p1_continuous p1_pure p1_mm p1_AMPa ///
+      p1_continuous_pure p1_continuous_mm p1_continuous_AMPa ///
+	  p1_pure_mm p1_pure_AMPa p1_mm_AMPa, fe vce(bootstrap)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+xtreg p2_diff p2_regret_sign_scale p2_continuous p2_pure p2_mm p2_AMPa ///
+      p2_continuous_pure p2_continuous_mm p2_continuous_AMPa ///
+	  p2_pure_mm p2_pure_AMPa p2_mm_AMPa, fe vce(robust)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+xtreg p2_diff p2_regret_sign_scale p2_continuous p2_pure p2_mm p2_AMPa ///
+      p2_continuous_pure p2_continuous_mm p2_continuous_AMPa ///
+	  p2_pure_mm p2_pure_AMPa p2_mm_AMPa, fe vce(bootstrap)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+
 **********BR learning**********
 * add independent variables
 use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear

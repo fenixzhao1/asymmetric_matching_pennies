@@ -1889,14 +1889,21 @@ xtable(median_table[[2]],digits=3,caption="Distance to predictions.")
 xtable(median_table[[3]],digits=3,caption="Distance to predictions.")
 
 
-##########Figure: Fitted regret-based learning model simulation##########
+##########Figure: Fitted regret-based learning model simulation RP##########
 learning_simulation = function(iteration, row_speed, column_speed, pure_indicator, step){
   
   # set simulation parameters
-  p1_strategy = runif(1, min = 0, max = 1)
-  p2_strategy = runif(1, min = 0, max = 1)
+  p1_mix = runif(1, 0, 1)
+  p2_mix = runif(1, 0, 1)
   
-  size = 1
+  if (pure_indicator == 1){
+    p1_strategy = ifelse(runif(1,0,1)<=p1_mix, 1, 0)
+    p2_strategy = ifelse(runif(1,0,1)<=p2_mix, 1, 0)
+    }
+  if (pure_indicator == 0){
+    p1_strategy = p1_mix
+    p2_strategy = p2_mix
+    }
   
   payoff1Aa = 800 
   payoff1Ab = 0
@@ -1909,9 +1916,10 @@ learning_simulation = function(iteration, row_speed, column_speed, pure_indicato
   
   # create data container
   simulation_data = matrix(0, nrow = iteration, ncol = 7)
-  colnames(simulation_data) = c('iteration', 'row_strategy', 'column_strategy', 'to_ne', 
-                                'delta', 'row_next', 'column_next')
+  colnames(simulation_data) = c('iteration', 'row_strategy', 'column_strategy', 
+                                'row_next', 'column_next', 'p1_time_average', 'p2_time_average')
   
+  size = 1
   i = 1
   while (i <= iteration){
     
@@ -1941,97 +1949,136 @@ learning_simulation = function(iteration, row_speed, column_speed, pure_indicato
     
     # record data
     simulation_data[i,1] = i
-    simulation_data[i,2] = p1_strategy
-    simulation_data[i,3] = p2_strategy
-    simulation_data[i,4] = sqrt((p1_strategy - 0.5)^2 + (p2_strategy - 0.2)^2)
+    simulation_data[i,2] = p1_mix
+    simulation_data[i,3] = p2_mix
+ 
+    # update player strategies and realizations
+    p1_mix = p1_mix + size * row_speed * p1_regret_sign
+    p1_mix = max(p1_mix, 0)
+    p1_mix = min(p1_mix, 1)
+    p2_mix = p2_mix + size * column_speed * p2_regret_sign
+    p2_mix = max(p2_mix, 0)
+    p2_mix = min(p2_mix, 1)
     
-    # update player strategies
+    if (pure_indicator == 1){
+      p1_strategy = ifelse(runif(1,0,1)<=p1_mix, 1, 0)
+      p2_strategy = ifelse(runif(1,0,1)<=p2_mix, 1, 0)
+    }
     if (pure_indicator == 0){
-      p1_strategy = p1_strategy + size * row_speed * p1_regret_sign
-      p2_strategy = p2_strategy + size * column_speed * p2_regret_sign
+      p1_strategy = p1_mix
+      p2_strategy = p2_mix
     }
-    else{
-      p1_strategy = p1_ahat
-      p2_strategy = p2_ahat
-    }
+    
+    # update column 4-7
+    simulation_data[i,4] = p1_mix
+    simulation_data[i,5] = p2_mix
+    simulation_data[i,6] = mean(simulation_data[1:i,4])
+    simulation_data[i,7] = mean(simulation_data[1:i,5])
     
     i = i + 1
     size = size * step
-    
   }
   
-  # calcualte column 5: first order difference of to_ne
-  for (k in 1:(iteration-1)){
-    simulation_data[k,5] = simulation_data[k+1,4] - simulation_data[k,4]
-    simulation_data[k,6] = simulation_data[k+1,2]
-    simulation_data[k,7] = simulation_data[k+1,3]
-  }
-  
-  # draw figure of learning process
-  simulation_data = data.frame(simulation_data)
-  
-  par(new=TRUE)
-  
-  # draw 3D plots
-  if (j == 1){
-    # 3D plot by NE
-    plot3D::lines3D(simulation_data$row_strategy, simulation_data$column_strategy, iteration-simulation_data$iteration, col='blue',
-                    xlab='row strategy', xlim=c(0:1),
-                    ylab='column strategy', ylim=c(0:1),
-                    zlab='time left',
-                    main = 'Simulation of fitted regret-based learning RP',
-                    theta=20, phi=30, r=2, d=1, bty='g')
-    plot3D::lines3D(rep(0.5, iteration), rep(0.2, iteration), iteration-simulation_data$iteration, col='black', add=TRUE)
-    plot3D::lines3D(rep(0.5, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='green', add=TRUE)
-    plot3D::lines3D(rep(0.2, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='red', add=TRUE)
-
-  }
-  else{
-    # 3D plot by NE
-    plot3D::lines3D(simulation_data$row_strategy, simulation_data$column_strategy, iteration-simulation_data$iteration, col='blue',
-                    xlab='row strategy', xlim=c(0:1),
-                    ylab='column strategy', ylim=c(0:1),
-                    zlab='time left',
-                    main = 'Simulation of fitted regret-based learning RP',
-                    theta=20, phi=30, r=2, d=1, bty='g', add=TRUE)
-    plot3D::lines3D(rep(0.5, iteration), rep(0.2, iteration), iteration-simulation_data$iteration, col='black', add=TRUE)
-    plot3D::lines3D(rep(0.5, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='green', add=TRUE)
-    plot3D::lines3D(rep(0.2, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='red', add=TRUE)
-  }
-  
-  # # try 2D plots
-  # plot(simulation_data$row_strategy, simulation_data$column_strategy,
-  #      xlab='row strategy', xlim=c(0:1),
-  #      ylab='column strategy', ylim=c(0:1),
-  #      main = 'Simulation of fitted regret-based learning', type = 'l', cex = 1.5)
+  # return dataset
+  return(simulation_data)
 }
 
 # run the simulation
-title = paste('Simulation3D AMPa RP C M')
+title = paste('Simulation2D AMPa rp M')
 file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/sims/", title, sep = "")
 file = paste(file, ".png", sep = "")
 png(file, width = 500, height = 500)
 
-for (j in 1:10){
-  learning_simulation(300, 0.12, 0.26, 0, 1)
+# store time average
+p1_average = c()
+p2_average = c()
+sims = 1
+iteration = 1000
+row_speed = 0.19
+column_speed = 0.15
+pure_indicator = 0
+step = 1
+
+for (j in 1:sims){
+  simulation_data = data.frame(learning_simulation(iteration, row_speed, column_speed, pure_indicator, step))
+  par(new=TRUE)
+  
+  # # draw 3D plots
+  # if (j == 1){
+  #   # 3D plot by NE
+  #   plot3D::lines3D(simulation_data$row_next, simulation_data$column_next, iteration-simulation_data$iteration, col='blue',
+  #                   xlab='row strategy', xlim=c(0:1),
+  #                   ylab='column strategy', ylim=c(0:1),
+  #                   zlab='time left',
+  #                   main = 'simulation random pairwise',
+  #                   theta=20, phi=30, r=2, d=1, bty='g')
+  #   plot3D::lines3D(rep(0.5, iteration), rep(0.2, iteration), iteration-simulation_data$iteration, col='black', add=TRUE)
+  #   plot3D::lines3D(rep(0.5, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='green', add=TRUE)
+  #   plot3D::lines3D(rep(0.2, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='red', add=TRUE)
+  # 
+  # }
+  # else{
+  #   # 3D plot by NE
+  #   plot3D::lines3D(simulation_data$row_next, simulation_data$column_next, iteration-simulation_data$iteration, col='blue',
+  #                   xlab='row strategy', xlim=c(0:1),
+  #                   ylab='column strategy', ylim=c(0:1),
+  #                   zlab='time left',
+  #                   theta=20, phi=30, r=2, d=1, bty='g', add=TRUE)
+  #   plot3D::lines3D(rep(0.5, iteration), rep(0.2, iteration), iteration-simulation_data$iteration, col='black', add=TRUE)
+  #   plot3D::lines3D(rep(0.5, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='green', add=TRUE)
+  #   plot3D::lines3D(rep(0.2, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='red', add=TRUE)
+  # }
+  
+  # try 2D plots
+  if (j == 1){
+    plot(simulation_data$row_next, simulation_data$column_next,
+         xlab='row strategy', xlim=c(0:1),
+         ylab='column strategy', ylim=c(0:1),
+         main = 'simulation random pairwise', type = 'l', cex = 1.5)
+  }
+  else{
+    plot(simulation_data$row_next, simulation_data$column_next,
+         xlab='row strategy', xlim=c(0:1),
+         ylab='column strategy', ylim=c(0:1), type = 'l', cex = 1.5)
+  }
+  
+  # add time average
+  p1_average = cbind(p1_average, simulation_data$p1_time_average[iteration])
+  p2_average = cbind(p2_average, simulation_data$p2_time_average[iteration])
 }
 
-# text(0.5,0.2,'NE',cex=1,pos=3,col="blue")
-# text(0.2,0.5,'MM',cex=1,pos=3,col="red")
+text(0.5,0.2,'NE',cex=1,pos=3,col="blue")
+text(0.2,0.5,'MM',cex=1,pos=3,col="red")
 
 dev.off()
 
+print(c(mean(p1_average), mean(p2_average)))
 
-# Building simulation in meanmatching
-learning_simulation_meanmatching = function(iteration, row_speed, column_speed, pure_indicator, group_size, k){
+
+##########Figure: Fitted regret-based learning model simulation MM##########
+# Building simulation in mean matching
+learning_simulation_meanmatching = function(iteration, row_speed, column_speed, pure_indicator, group_size){
   
   # set simulation parameters
-  p1_strategy = rep(0, group_size)
-  p2_strategy = rep(0, group_size)
+  p1_mix = rep(0, group_size)
+  p2_mix = rep(0, group_size)
+  p1_strategy = p1_mix
+  p2_strategy = p2_mix
+  
   for (j in 1:group_size){
-    p1_strategy[j] = runif(1, min = 0, max = 1)
-    p2_strategy[j] = runif(1, min = 0, max = 1)
+    p1_mix[j] = runif(1, 0, 1)
+    p2_mix[j] = runif(1, 0, 1)
+    
+    if (pure_indicator == 1){
+      p1_strategy[j] = ifelse(runif(1,0,1)<=p1_mix[j], 1, 0)
+      p2_strategy[j] = ifelse(runif(1,0,1)<=p2_mix[j], 1, 0)
+    }
+    if (pure_indicator == 0){
+      p1_strategy[j] = p1_mix[j]
+      p2_strategy[j] = p2_mix[j]
+    }
   }
+  
   p1_average = mean(p1_strategy)
   p2_average = mean(p2_strategy)
   
@@ -2045,8 +2092,9 @@ learning_simulation_meanmatching = function(iteration, row_speed, column_speed, 
   payoff2Bb = 0
   
   # create data container
-  simulation_data = matrix(0, nrow = iteration, ncol = 3)
-  colnames(simulation_data) = c('iteration', 'row_strategy', 'column_strategy')
+  simulation_data = matrix(0, nrow = iteration, ncol = 7)
+  colnames(simulation_data) = c('iteration', 'row_strategy', 'column_strategy', 
+                                'row_next', 'column_next', 'p1_time_average', 'p2_time_average')
   
   i = 1
   while (i <= iteration){
@@ -2101,81 +2149,112 @@ learning_simulation_meanmatching = function(iteration, row_speed, column_speed, 
     
     # record data
     simulation_data[i,1] = i
-    simulation_data[i,2] = p1_average
-    simulation_data[i,3] = p2_average
+    simulation_data[i,2] = mean(p1_mix)
+    simulation_data[i,3] = mean(p2_mix)
     
-    # update player strategies
-    if (pure_indicator == 0){
-      for (j in 1:group_size){
-        p1_strategy[j] = p1_strategy[j] + row_speed * p1_regret_sign[j]
-        p2_strategy[j] = p2_strategy[j] + column_speed * p2_regret_sign[j]
-      }
+    # update player strategies and realizations
+    for (j in 1:group_size){
+      p1_mix[j] = p1_mix[j] + row_speed * p1_regret_sign[j]
+      p1_mix[j] = max(p1_mix[j], 0)
+      p1_mix[j] = min(p1_mix[j], 1)
+      p2_mix[j] = p2_mix[j] + column_speed * p2_regret_sign[j]
+      p2_mix[j] = max(p2_mix[j], 0)
+      p2_mix[j] = min(p2_mix[j], 1)
       
-    }
-    else{
-      for (j in 1:group_size){
-        p1_strategy[j] = p1_ahat[j]
-        p2_strategy[j] = p2_ahat[j]
+      if (pure_indicator == 1){
+        p1_strategy[j] = ifelse(runif(1,0,1)<=p1_mix[j], 1, 0)
+        p2_strategy[j] = ifelse(runif(1,0,1)<=p2_mix[j], 1, 0)
+      }
+      if (pure_indicator == 0){
+        p1_strategy[j] = p1_mix[j]
+        p2_strategy[j] = p2_mix[j]
       }
     }
+    
+    simulation_data[i,4] = mean(p1_mix)
+    simulation_data[i,5] = mean(p2_mix)
+    simulation_data[i,6] = mean(simulation_data[1:i,4])
+    simulation_data[i,7] = mean(simulation_data[1:i,5])
     
     p1_average = mean(p1_strategy)
     p2_average = mean(p2_strategy)
     i = i + 1
   }
   
-  # draw figure of learning process
-  simulation_data = data.frame(simulation_data)
-  
-  par(new=TRUE)
-  
-  if (k == 1){
-    # 3D plot by NE
-    plot3D::lines3D(simulation_data$row_strategy, simulation_data$column_strategy, iteration-simulation_data$iteration, col='blue',
-                    xlab='row strategy', xlim=c(0:1),
-                    ylab='column strategy', ylim=c(0:1),
-                    zlab='time left',
-                    main = 'Simulation of fitted regret-based learning MM',
-                    theta=20, phi=30, r=2, d=1, bty='g')
-    plot3D::lines3D(rep(0.5, iteration), rep(0.2, iteration), iteration-simulation_data$iteration, col='black', add=TRUE)
-    plot3D::lines3D(rep(0.5, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='green', add=TRUE)
-    plot3D::lines3D(rep(0.2, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='red', add=TRUE)
-
-  }
-  else{
-    # 3D plot by NE
-    plot3D::lines3D(simulation_data$row_strategy, simulation_data$column_strategy, iteration-simulation_data$iteration, col='blue',
-                    xlab='row strategy', xlim=c(0:1),
-                    ylab='column strategy', ylim=c(0:1),
-                    zlab='time left',
-                    main = 'Simulation of fitted regret-based learning',
-                    theta=20, phi=30, r=2, d=1, bty='g', add=TRUE)
-    plot3D::lines3D(rep(0.5, iteration), rep(0.2, iteration), iteration-simulation_data$iteration, col='black', add=TRUE)
-    plot3D::lines3D(rep(0.5, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='green', add=TRUE)
-    plot3D::lines3D(rep(0.2, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='red', add=TRUE)
-  }
-  
-  # # try 2D plots
-  # plot(simulation_data$row_strategy, simulation_data$column_strategy,
-  #      xlab='row strategy', xlim=c(0:1),
-  #      ylab='column strategy', ylim=c(0:1),
-  #      main = 'Simulation of fitted regret-based learning', type = 'l')
+  # return dataset
+  return(simulation_data)
 }
 
 # run the simulation
-title = paste('Simulation3D AMPa MM C P')
+title = paste('Simulation2D AMPa mm P')
 file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/sims/", title, sep = "")
 file = paste(file, ".png", sep = "")
 png(file, width = 500, height = 500)
 
-for (j in 1:10){
-  learning_simulation_meanmatching(300, 0.12, 0.26, 1, 6, j)
+# store time average
+p1pop_average = c()
+p2pop_average = c()
+sims = 1
+iteration = 1000
+row_speed = 0.19
+column_speed = 0.15
+pure_indicator = 1
+group_size = 5
+
+for (j in 1:sims){
+  simulation_data = data.frame(learning_simulation_meanmatching(iteration, row_speed, column_speed, pure_indicator, group_size))
+  
+  par(new=TRUE)
+  
+  # if (j == 1){
+  #   # 3D plot by NE
+  #   plot3D::lines3D(simulation_data$row_next, simulation_data$column_next, iteration-simulation_data$iteration, col='blue',
+  #                   xlab='row strategy', xlim=c(0:1),
+  #                   ylab='column strategy', ylim=c(0:1),
+  #                   zlab='time left',
+  #                   main = 'simulation mean matching',
+  #                   theta=20, phi=30, r=2, d=1, bty='g')
+  #   plot3D::lines3D(rep(0.5, iteration), rep(0.2, iteration), iteration-simulation_data$iteration, col='black', add=TRUE)
+  #   plot3D::lines3D(rep(0.5, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='green', add=TRUE)
+  #   plot3D::lines3D(rep(0.2, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='red', add=TRUE)
+  #   
+  # }
+  # else{
+  #   # 3D plot by NE
+  #   plot3D::lines3D(simulation_data$row_strategy, simulation_data$column_strategy, iteration-simulation_data$iteration, col='blue',
+  #                   xlab='row strategy', xlim=c(0:1),
+  #                   ylab='column strategy', ylim=c(0:1),
+  #                   zlab='time left',
+  #                   theta=20, phi=30, r=2, d=1, bty='g', add=TRUE)
+  #   plot3D::lines3D(rep(0.5, iteration), rep(0.2, iteration), iteration-simulation_data$iteration, col='black', add=TRUE)
+  #   plot3D::lines3D(rep(0.5, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='green', add=TRUE)
+  #   plot3D::lines3D(rep(0.2, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='red', add=TRUE)
+  # }
+
+  # try 2D plots
+  if (j == 1){
+    plot(simulation_data$row_next, simulation_data$column_next,
+         xlab='row strategy', xlim=c(0:1),
+         ylab='column strategy', ylim=c(0:1),
+         main = 'simulation mean matching', type = 'l', cex = 1.5)
+  }
+  else{
+    plot(simulation_data$row_next, simulation_data$column_next,
+         xlab='row strategy', xlim=c(0:1),
+         ylab='column strategy', ylim=c(0:1), type = 'l', cex = 1.5)
+  }
+  
+  # add time average
+  p1pop_average = cbind(p1pop_average, simulation_data$p1_time_average[iteration])
+  p2pop_average = cbind(p2pop_average, simulation_data$p2_time_average[iteration])
 }
 
 text(0.5,0.2,'NE',cex=1,pos=3,col="blue")
 text(0.2,0.5,'MM',cex=1,pos=3,col="red")
 
 dev.off()
+
+print(c(mean(p1pop_average), mean(p2pop_average)))
 
 
 ##########Fiugre: Limited cycles simulation##########
