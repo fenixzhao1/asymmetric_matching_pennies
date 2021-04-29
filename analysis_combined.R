@@ -63,7 +63,7 @@ rm(merge_mm, merge_rp)
 write.dta(full_data, "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta")
 
 
-##########Figure Table: data summary chart and table by game##########
+##########Figure Table (not used): data summary chart and table by game##########
 # create data container
 plot_data = list()
 
@@ -1463,14 +1463,18 @@ for (i in 1:length(gametype)){
                 color = 'azure2', fill = 'azure2', alpha = 0.5, size = 1.5) +
       geom_rect(mapping = aes(xmin = 0, ymin = 0.33, xmax = 0.5, ymax = 0.5), 
                 color = 'azure2', fill = 'azure2', alpha = 0.5, size = 1.5) +
+      geom_point(data = qre_precision, aes(x = p2_row, y = p1_row)) +
       geom_point(data = game_data, aes(x = p2_average, y = p1_average, color = treat), size=3) +
       geom_text(aes(x = game_data$p2NEmix[1], y = game_data$p1NEmix[1],
-                    label = 'NE'), vjust = 0, hjust = 0) +
+                    label = 'NE'), vjust = -0.2, hjust = -0.2) +
       geom_text(aes(x = game_data$p2MMmix[1], y = game_data$p1MMmix[1],
-                    label = 'MM'), vjust = 0, hjust = 0) +
+                    label = 'MM'), vjust = -0.2, hjust = -0.2) +
       geom_text(aes(x = 0.5, y = 0.5,
-                    label = 'Center'), vjust = 0, hjust = 0) +
-      #geom_line(data = qre_precision, aes(x = p2_row, y = p1_row)) +
+                    label = 'Center'), vjust = -0.1, hjust = -0.1) +
+      geom_point(data = game_data, aes(x = p2NEmix[1], y = p1NEmix[1]), size=3) +
+      geom_point(data = game_data, aes(x = p2MMmix[1], y = p1MMmix[1]), size=3) +
+      geom_point(data = game_data, aes(x = 0.5, y = 0.5), size=3) +
+      
       ggtitle(title) +
       scale_x_continuous(name='column strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
       scale_y_continuous(name='row strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
@@ -1503,14 +1507,17 @@ for (i in 1:length(gametype)){
     pic = ggplot() +
       geom_rect(mapping = aes(xmin = 0.2, ymin = 0.5, xmax = 0.5, ymax = 1), 
                 color = 'azure2', fill = 'azure2', alpha = 0.5, size = 1.5) +
+      geom_point(data = qre_precision, aes(x = p2_row, y = p1_row)) +
       geom_point(data = game_data, aes(x = p2_average, y = p1_average, color = treat), size=3) +
       geom_text(aes(x = game_data$p2NEmix[1], y = game_data$p1NEmix[1],
-                    label = 'NE'), vjust = 0, hjust = 0) +
+                    label = 'NE'), vjust = -0.2, hjust = -0.2) +
       geom_text(aes(x = game_data$p2MMmix[1], y = game_data$p1MMmix[1],
-                    label = 'MM'), vjust = 0, hjust = 0) +
+                    label = 'MM'), vjust = -0.2, hjust = -0.2) +
       geom_text(aes(x = 0.5, y = 0.5,
-                    label = 'Center'), vjust = 0, hjust = 0) +
-      #geom_line(data = qre_precision, aes(x = p2_row, y = p1_row)) +
+                    label = 'Center'), vjust = -0.1, hjust = -0.1) +
+      geom_point(data = game_data, aes(x = p2NEmix[1], y = p1NEmix[1]), size=3) +
+      geom_point(data = game_data, aes(x = p2MMmix[1], y = p1MMmix[1]), size=3) +
+      geom_point(data = game_data, aes(x = 0.5, y = 0.5), size=3) +
       ggtitle(title) +
       scale_x_continuous(name='column strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
       scale_y_continuous(name='row strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
@@ -1538,11 +1545,15 @@ for (i in 1:length(gametype)){
     pic = ggplot() +
       geom_rect(mapping = aes(xmin = 0.5, ymin = 0, xmax = 1, ymax = 0.5), 
                 color = 'azure2', fill = 'azure2', alpha = 0.5, size = 1.5) +
+      geom_point(aes(x = seq(from=0.5, to=game_data$p2NEmix[1], by=0.01), 
+                     y = seq(from=0.5, to=game_data$p1NEmix[1], by=-0.01))) +
       geom_point(data = game_data, aes(x = p2_average, y = p1_average, color = treat), size=3) +
       geom_text(aes(x = game_data$p2NEmix[1], y = game_data$p1NEmix[1],
-                    label = 'NE'), vjust = 0, hjust = 0) +
+                    label = 'NE'), vjust = -0.2, hjust = -0.2) +
       geom_text(aes(x = 0.5, y = 0.5,
-                    label = 'Center'), vjust = 0, hjust = 0) +
+                    label = 'Center'), vjust = -0.1, hjust = -0.1) +
+      geom_point(data = game_data, aes(x = p2NEmix[1], y = p1NEmix[1]), size=3) +
+      geom_point(data = game_data, aes(x = 0.5, y = 0.5), size=3) +
       ggtitle(title) +
       scale_x_continuous(name='column strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
       scale_y_continuous(name='row strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
