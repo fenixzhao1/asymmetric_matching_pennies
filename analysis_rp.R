@@ -12,12 +12,14 @@ library(csv)
 library(foreign)
 
 # load data 
-bimatrix_choice <- read.csv("/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/production/data_pairwise_matching.csv", header = T)
+bimatrix_choice <- read.csv("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/data_rp.csv"
+                            , header = T)
 
 # create round variable in choice data and create full dataset
 bimatrix_choice$round = as.double(substring(bimatrix_choice$subsession_id, 3, 4))
 full_data = bimatrix_choice
 full_data = arrange(full_data, full_data$session_code, full_data$subsession_id, full_data$id_in_subsession, full_data$tick)
+rm(bimatrix_choice)
 
 # create round/pair id
 full_data$pair_id = paste(full_data$p1_code, full_data$p2_code, sep = "_")
@@ -28,7 +30,7 @@ full_data$session_round_id = paste(full_data$session_code, full_data$round, sep 
 # drop Nah data
 full_data = filter(full_data, tick > 1 | num_subperiods == 15)
 
-# add group variables
+# add treatment variables
 full_data = full_data %>% mutate(game_AMPa = ifelse(payoff1Aa == 800,1,0))
 full_data = full_data %>% mutate(game_AMPb = ifelse(payoff1Aa == 300,1,0))
 full_data = full_data %>% mutate(game_idds = ifelse(payoff1Aa == 200,1,0))
@@ -41,7 +43,17 @@ full_data = full_data %>% mutate(MD = ifelse(pure_strategy=="FALSE", ifelse(num_
 
 full_data = full_data %>% mutate(dummy_continuous = ifelse(num_subperiods==0, 1, 0))
 full_data = full_data %>% mutate(dummy_pure = ifelse(pure_strategy=="TRUE", 1, 0))
+full_data = full_data %>% mutate(dummy_mm = ifelse(mean_matching=='TRUE', 1, 0))
+full_data = full_data %>% mutate(dummy_AMPa = ifelse(game=='AMPa', 1, 0))
+full_data = full_data %>% mutate(dummy_IDDS = ifelse(game=='IDDS', 1, 0))
 
+full_data = full_data %>% mutate(
+  time = ifelse(num_subperiods==0, 'C', 'D'),
+  match = ifelse(mean_matching==TRUE, 'mm', 'rp'),
+  actionsets = ifelse(pure_strategy==TRUE, 'P', 'M'),
+  treatmentfull = paste(game, actionsets, time, match, sep = '_'))
+
+# add NE and MM info
 full_data = full_data %>% mutate(p1NEmix = ifelse(game == "AMPa", .5, ifelse(game == "AMPb", .33, 0)))
 full_data = full_data %>% mutate(p2NEmix = ifelse(game == "AMPa", .2, ifelse(game == 'AMPb', .75, 1)))
 full_data = full_data %>% mutate(p1MMmix = ifelse(game == "AMPa", .2, ifelse(game == "AMPb", .75, 0)))
@@ -66,10 +78,14 @@ full_data = full_data %>% mutate(p1NEdiff = sqrt((p1_strategy - p1NEmix)^2))
 full_data = full_data %>% mutate(p1MMdiff = sqrt((p1_strategy - p1MMmix)^2))
 full_data = full_data %>% mutate(p2NEdiff = sqrt((p2_strategy - p2NEmix)^2))
 full_data = full_data %>% mutate(p2MMdiff = sqrt((p2_strategy - p2MMmix)^2))
+full_data = full_data %>% mutate(p1NEdiffsgn = p1_strategy - p1NEmix)
+full_data = full_data %>% mutate(p1MMdiffsgn = p1_strategy - p1MMmix)
+full_data = full_data %>% mutate(p2NEdiffsgn = p2_strategy - p2NEmix)
+full_data = full_data %>% mutate(p2MMdiffsgn = p2_strategy - p2MMmix)
 
-# give 12 treatments numbers
+# create a new treatment variable combining games, action sets and time
 full_data = full_data %>% mutate(treatment = 0)
-for(m in 1:length(full_data$p1_strategy)){
+for(m in 1:length(full_data$tick)){
   if (full_data$game[m]=="AMPa" & full_data$PD[m]==1){full_data$treatment[m] = 1}
   if (full_data$game[m]=="AMPa" & full_data$PC[m]==1){full_data$treatment[m] = 2}
   if (full_data$game[m]=="AMPa" & full_data$MD[m]==1){full_data$treatment[m] = 3}
@@ -86,7 +102,20 @@ for(m in 1:length(full_data$p1_strategy)){
   if (full_data$game[m]=="IDDS" & full_data$MC[m]==1){full_data$treatment[m] = 12}
 }
 
-# create merge data
+# create a new treatment variable combining matching, action sets and time
+full_data = full_data %>% mutate(treatment2 = 0)
+for(m in 1:length(full_data$tick)){
+  if (full_data$mean_matching[m]=='FALSE' & full_data$PD[m]==1){full_data$treatment2[m] = 1}
+  if (full_data$mean_matching[m]=='FALSE' & full_data$PC[m]==1){full_data$treatment2[m] = 2}
+  if (full_data$mean_matching[m]=='FALSE' & full_data$MD[m]==1){full_data$treatment2[m] = 3}
+  if (full_data$mean_matching[m]=='FALSE' & full_data$MC[m]==1){full_data$treatment2[m] = 4}
+  
+  if (full_data$mean_matching[m]=='TRUE' & full_data$PD[m]==1){full_data$treatment2[m] = 5}
+  if (full_data$mean_matching[m]=='TRUE' & full_data$PC[m]==1){full_data$treatment2[m] = 6}
+  if (full_data$mean_matching[m]=='TRUE' & full_data$MD[m]==1){full_data$treatment2[m] = 7}
+  if (full_data$mean_matching[m]=='TRUE' & full_data$MC[m]==1){full_data$treatment2[m] = 8}
+}
+
 # drop first 3 subperiod or first 18 seconds
 full_data = subset(full_data, tick>=3)
 full_data = filter(full_data, tick>=36 | num_subperiods==15)
@@ -94,33 +123,31 @@ full_data = filter(full_data, tick>=36 | num_subperiods==15)
 # drop first period of each block
 full_data = filter(full_data, round!=1 & round!=7 & round!=13 & round!=19 & round!=25)
 
-# merge_data = full_data
-# # merge_data = merge_data %>% select(-c(p1_code, p1_role, p1_strategy, p1_target, p1_payoff))
-# # merge_data = merge_data %>% select(-c(p2_code, p2_role, p2_strategy, p2_target, p2_payoff))
-# # merge_data = merge_data %>% select(-c(pair_id, round_pair_id, session_round_pair_id))
-# write.csv(merge_data, "/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/production/merge_rp.csv")
-
-# create unique pairs
-uniqueID = unique(full_data$session_round_pair_id)
-gametype = unique(full_data$game)
-
-# create subject id
-uniquePlayer = union(unique(full_data$p1_code), unique(full_data$p2_code))
+# create merge data
+merge_data = full_data
+write.csv(merge_data, "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/merge_rp.csv")
+rm(merge_data)
 
 # create new action type
 full_data = full_data %>% mutate(strategy_profile = 0)
 for (m in 1:length(full_data$tick)){
   if ((full_data$p1_strategy[m] >= full_data$p1NEmix[m]) & (full_data$p2_strategy[m] > full_data$p2NEmix[m]))
-    {full_data$strategy_profile[m] = 'AA'}
+  {full_data$strategy_profile[m] = 'AA'}
   if ((full_data$p1_strategy[m] > full_data$p1NEmix[m]) & (full_data$p2_strategy[m] <= full_data$p2NEmix[m]))
-    {full_data$strategy_profile[m] = 'AB'}
+  {full_data$strategy_profile[m] = 'AB'}
   if ((full_data$p1_strategy[m] <= full_data$p1NEmix[m]) & (full_data$p2_strategy[m] < full_data$p2NEmix[m]))
-    {full_data$strategy_profile[m] = 'BB'}
+  {full_data$strategy_profile[m] = 'BB'}
   if ((full_data$p1_strategy[m] < full_data$p1NEmix[m]) & (full_data$p2_strategy[m] >= full_data$p2NEmix[m]))
-    {full_data$strategy_profile[m] = 'BA'}
+  {full_data$strategy_profile[m] = 'BA'}
 }
 
-##########Directional learining preparation##########
+# create unique ID
+uniqueID = unique(full_data$session_round_pair_id)
+gametype = unique(full_data$game)
+uniquePlayer = union(unique(full_data$p1_code), unique(full_data$p2_code))
+
+
+##########Directional learning preparation##########
 # regret and directional learning variables
 full_data = full_data %>% mutate(p1_uhat_a1 = payoff1Aa*p2_strategy + payoff1Ab*(1-p2_strategy))
 full_data = full_data %>% mutate(p1_uhat_a0 = payoff1Ba*p2_strategy + payoff1Bb*(1-p2_strategy))
@@ -142,16 +169,7 @@ full_data = full_data %>% mutate(p2_direction = p2_ahat - p2_strategy)
 full_data = full_data %>% mutate(p2_sign = ifelse(p2_direction > 0, 1, ifelse(p2_direction < 0, -1, 0)))
 full_data = full_data %>% mutate(p2_regret_sign = p2_regret * p2_sign)
 
-# treatment variables for regression
-full_data = full_data %>% mutate(dummy_show_worst = ifelse(show_at_worst==TRUE, 1, 0))
-full_data = full_data %>% mutate(dummy_show_best = ifelse(show_best_response==TRUE, 1, 0))
-full_data = full_data %>% mutate(dummy_AMPa = ifelse(game=='AMPa', 1, 0))
-full_data = full_data %>% mutate(dummy_IDDS = ifelse(game=='IDDS', 1, 0))
-full_data = full_data %>% mutate(dummy_mm = 0)
-
-# full_data = full_data %>% mutate(p1_regret_sign_continuous = p1_regret_sign * dummy_continuous)
-# full_data = full_data %>% mutate(p1_regret_sign_showworst = p1_regret_sign * dummy_show_worst)
-# full_data = full_data %>% mutate(p1_regret_sign_showbest = p1_regret_sign * dummy_show_best)
+# add interactive dummies
 full_data = full_data %>% mutate(p1_regret_sign_pure = p1_regret_sign * dummy_pure)
 full_data = full_data %>% mutate(p1_regret_sign_AMPa = p1_regret_sign * dummy_AMPa)
 full_data = full_data %>% mutate(p1_regret_sign_IDDS = p1_regret_sign * dummy_IDDS)
@@ -164,9 +182,6 @@ full_data = full_data %>% mutate(p1_regret_sign_mm_IDDS = p1_regret_sign * dummy
 full_data = full_data %>% mutate(p1_regret_sign_pure_mm_AMPa = p1_regret_sign * dummy_pure * dummy_mm * dummy_AMPa)
 full_data = full_data %>% mutate(p1_regret_sign_pure_mm_IDDS = p1_regret_sign * dummy_pure * dummy_mm * dummy_IDDS)
 
-# full_data = full_data %>% mutate(p2_regret_sign_continuous = p2_regret_sign * dummy_continuous)
-# full_data = full_data %>% mutate(p2_regret_sign_showworst = p2_regret_sign * dummy_show_worst)
-# full_data = full_data %>% mutate(p2_regret_sign_showbest = p2_regret_sign * dummy_show_best)
 full_data = full_data %>% mutate(p2_regret_sign_pure = p2_regret_sign * dummy_pure)
 full_data = full_data %>% mutate(p2_regret_sign_AMPa = p2_regret_sign * dummy_AMPa)
 full_data = full_data %>% mutate(p2_regret_sign_IDDS = p2_regret_sign * dummy_IDDS)
@@ -197,13 +212,13 @@ full_data = full_data %>% mutate(p1_diff_speed = p1_diff / p1_strategy)
 full_data = full_data %>% mutate(p2_diff_speed = p2_diff / p2_strategy)
 
 # export dataset to stata
-write.dta(full_data, "/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/stata/mp_production_pairwise.dta")
+write.dta(full_data, "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production_rp.dta")
 
 # write csv file
-write.csv(full_data, "/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/production/merge_rp.csv")
+write.csv(full_data, "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/merge_rp.csv")
 
 
-##########Figure 1: Individual cyclic behavior##########
+##########Figure 1: Individual cyclical dynamics##########
 # select game
 part_data = subset(full_data, game=='AMPa')
 #part_data = subset(full_data, MC == 1 | PD == 1)
@@ -437,7 +452,8 @@ for(i in 1:length(uniquePairs)){
   }
 }
 
-##########Figure 3: Cyclical behavior by pairs##########
+
+##########Figure 3: Cyclical dynamics by pairs##########
 # generate data container for pure strategy
 length = rep(NA, 1)
 pair_data_pure = data.frame(stay = length, CW = length, CCW = length, diagonal = length, total = length,
@@ -829,73 +845,7 @@ write.dta(pair_data, "/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching penn
 # }
 
 
-##########Figure 3.5 (not used): Clustering based on pair level dynamics##########
-# lower the dimension of dynamics from 4 to 2
-pair_data = pair_data %>% mutate(type_cw = CW)
-pair_data = pair_data %>% mutate(type_adv = CCW + diagonal)
-pair_data = pair_data %>% mutate(cluster = 0)
-
-# random select k initial centers
-k = 4
-iterations = 10
-center = data.frame(type_cw = c(0, 1, 0.5, 0),
-                    type_adv = c(1, 0, 0.5, 0))
-error = 0
-
-# create k mean function
-for (m in 1:iterations){
-  
-  # loop over observations
-  for (i in 1:length(pair_data$type_cw)){
-    
-    # set initial distance
-    distance_min = 100000
-    
-    # loop over centers
-    for (j in 1:k){
-      distance = sqrt((pair_data$type_cw[i] - center$type_cw[j])^2 + (pair_data$type_adv[i] - center$type_adv[j])^2)
-      
-      if (distance < distance_min){
-        distance_min = distance
-        pair_data$cluster[i] = j
-      }
-    }
-    # calculate total error in the last iteration
-    if (m==iterations){error = error + distance_min}
-  }
-  
-  # update the center in the current iteration
-  for (h in 1:k){
-    update = subset(pair_data, cluster==h)
-    center$type_cw[h] = mean(update$type_cw)
-    center$type_adv[h] = mean(update$type_adv)
-  }
-}
-
-# create clustering figure
-# set title
-title = paste('simple clustering of dynamics')
-file = paste("/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/production/data_summary/", title, sep = "")
-file = paste(file, ".png", sep = "")
-png(file, width = 600, height = 600)
-
-# ggplot with rectanglers, NE and MM points.
-pic = ggplot() +
- 
-  geom_point(data = pair_data, mapping = aes(x = type_cw, y = type_adv, colour = factor(cluster))) +
-  
-  geom_point(data = center, mapping = aes(x = type_cw, y = type_adv, size = 1.5))
-
-  ggtitle('clustering of dynamics') +
-  scale_fill_gradient(low = "red", high = "purple") +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5, size = 20))
-
-print(pic)
-dev.off()
-
-
-##########Figure 4: Cyclical behaviour over time##########
+##########Figure 4: Cyclical dynamics over time##########
 # change the frequency of data to every two seconds (only in continuous time)
 #part_data = subset(full_data, tick%%2 == 0)
 part_data = full_data
@@ -1426,4 +1376,70 @@ for (p in 1:k){
   lines(center[p,145:288], col = 'red', type = 'l')
 }
 
+dev.off()
+
+
+##########Figure 9 (not used): Clustering based on pair level dynamics##########
+# lower the dimension of dynamics from 4 to 2
+pair_data = pair_data %>% mutate(type_cw = CW)
+pair_data = pair_data %>% mutate(type_adv = CCW + diagonal)
+pair_data = pair_data %>% mutate(cluster = 0)
+
+# random select k initial centers
+k = 4
+iterations = 10
+center = data.frame(type_cw = c(0, 1, 0.5, 0),
+                    type_adv = c(1, 0, 0.5, 0))
+error = 0
+
+# create k mean function
+for (m in 1:iterations){
+  
+  # loop over observations
+  for (i in 1:length(pair_data$type_cw)){
+    
+    # set initial distance
+    distance_min = 100000
+    
+    # loop over centers
+    for (j in 1:k){
+      distance = sqrt((pair_data$type_cw[i] - center$type_cw[j])^2 + (pair_data$type_adv[i] - center$type_adv[j])^2)
+      
+      if (distance < distance_min){
+        distance_min = distance
+        pair_data$cluster[i] = j
+      }
+    }
+    # calculate total error in the last iteration
+    if (m==iterations){error = error + distance_min}
+  }
+  
+  # update the center in the current iteration
+  for (h in 1:k){
+    update = subset(pair_data, cluster==h)
+    center$type_cw[h] = mean(update$type_cw)
+    center$type_adv[h] = mean(update$type_adv)
+  }
+}
+
+# create clustering figure
+# set title
+title = paste('simple clustering of dynamics')
+file = paste("/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/production/data_summary/", title, sep = "")
+file = paste(file, ".png", sep = "")
+png(file, width = 600, height = 600)
+
+# ggplot with rectanglers, NE and MM points.
+pic = ggplot() +
+  
+  geom_point(data = pair_data, mapping = aes(x = type_cw, y = type_adv, colour = factor(cluster))) +
+  
+  geom_point(data = center, mapping = aes(x = type_cw, y = type_adv, size = 1.5))
+
+ggtitle('clustering of dynamics') +
+  scale_fill_gradient(low = "red", high = "purple") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5, size = 20))
+
+print(pic)
 dev.off()

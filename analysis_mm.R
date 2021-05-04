@@ -14,12 +14,14 @@ library(rgl)
 library(plot3D)
 
 # load data 
-bimatrix_choice <- read.csv("/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/production/data_mean_matching.csv", header = T)
+bimatrix_choice <- read.csv("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/data_mm.csv"
+                            , header = T)
 
 # create round variable in choice data and create full dataset
 bimatrix_choice$round = as.double(substring(bimatrix_choice$subsession_id, 2, 3))
 full_data = bimatrix_choice
 full_data = arrange(full_data, full_data$session_code, full_data$subsession_id, full_data$id_in_subsession, full_data$tick)
+rm(bimatrix_choice)
 
 # create round/pair id
 full_data$session_round_id = paste(full_data$session_code, full_data$round, sep = "_")
@@ -40,7 +42,17 @@ full_data = full_data %>% mutate(MD = ifelse(pure_strategy=="FALSE", ifelse(num_
 
 full_data = full_data %>% mutate(dummy_continuous = ifelse(num_subperiods==0, 1, 0))
 full_data = full_data %>% mutate(dummy_pure = ifelse(pure_strategy=="TRUE", 1, 0))
+full_data = full_data %>% mutate(dummy_mm = ifelse(mean_matching=='TRUE', 1, 0))
+full_data = full_data %>% mutate(dummy_AMPa = ifelse(game=='AMPa', 1, 0))
+full_data = full_data %>% mutate(dummy_IDDS = ifelse(game=='IDDS', 1, 0))
 
+full_data = full_data %>% mutate(
+  time = ifelse(num_subperiods==0, 'C', 'D'),
+  match = ifelse(mean_matching==TRUE, 'mm', 'rp'),
+  actionsets = ifelse(pure_strategy==TRUE, 'P', 'M'),
+  treatmentfull = paste(game, actionsets, time, match, sep = '_'))
+
+# add NE and MM info
 full_data = full_data %>% mutate(p1NEmix = ifelse(game == "AMPa", .5, ifelse(game == "AMPb", .33, 0)))
 full_data = full_data %>% mutate(p2NEmix = ifelse(game == "AMPa", .2, ifelse(game == "AMPb", .75, 1)))
 full_data = full_data %>% mutate(p1MMmix = ifelse(game == "AMPa", .2, ifelse(game == "AMPb", .75, 0)))
@@ -71,7 +83,7 @@ for (i in 1:length(full_data$tick)){
   }
 }
 
-# calculate mean payoff
+# calculate players payoff
 full_data = full_data %>% mutate(p1_payoff = payoff1Aa*p1_strategy*p2_average + payoff1Ab*p1_strategy*(1-p2_average) + payoff1Ba*(1-p1_strategy)*p2_average + payoff1Bb*(1-p1_strategy)*(1-p2_average))
 full_data = full_data %>% mutate(p3_payoff = payoff1Aa*p3_strategy*p2_average + payoff1Ab*p3_strategy*(1-p2_average) + payoff1Ba*(1-p3_strategy)*p2_average + payoff1Bb*(1-p3_strategy)*(1-p2_average))
 full_data = full_data %>% mutate(p5_payoff = payoff1Aa*p5_strategy*p2_average + payoff1Ab*p5_strategy*(1-p2_average) + payoff1Ba*(1-p5_strategy)*p2_average + payoff1Bb*(1-p5_strategy)*(1-p2_average))
@@ -97,8 +109,12 @@ full_data = full_data %>% mutate(p1NEdiff = sqrt((p1_average - p1NEmix)^2))
 full_data = full_data %>% mutate(p1MMdiff = sqrt((p1_average - p1MMmix)^2))
 full_data = full_data %>% mutate(p2NEdiff = sqrt((p2_average - p2NEmix)^2))
 full_data = full_data %>% mutate(p2MMdiff = sqrt((p2_average - p2MMmix)^2))
+full_data = full_data %>% mutate(p1NEdiffsgn = p1_strategy - p1NEmix)
+full_data = full_data %>% mutate(p1MMdiffsgn = p1_strategy - p1MMmix)
+full_data = full_data %>% mutate(p2NEdiffsgn = p2_strategy - p2NEmix)
+full_data = full_data %>% mutate(p2MMdiffsgn = p2_strategy - p2MMmix)
 
-# give 12 treatments numbers
+# create a new treatment variable combining games, action sets and time
 full_data = full_data %>% mutate(treatment = 0)
 for(m in 1:length(full_data$p1_strategy)){
   if (full_data$game[m]=="AMPa" & full_data$PD[m]==1){full_data$treatment[m] = 1}
@@ -117,10 +133,25 @@ for(m in 1:length(full_data$p1_strategy)){
   if (full_data$game[m]=="IDDS" & full_data$MC[m]==1){full_data$treatment[m] = 12}
 }
 
+# create a new treatment variable combining matching, action sets and time
+full_data = full_data %>% mutate(treatment2 = 0)
+for(m in 1:length(full_data$tick)){
+  if (full_data$mean_matching[m]=='FALSE' & full_data$PD[m]==1){full_data$treatment2[m] = 1}
+  if (full_data$mean_matching[m]=='FALSE' & full_data$PC[m]==1){full_data$treatment2[m] = 2}
+  if (full_data$mean_matching[m]=='FALSE' & full_data$MD[m]==1){full_data$treatment2[m] = 3}
+  if (full_data$mean_matching[m]=='FALSE' & full_data$MC[m]==1){full_data$treatment2[m] = 4}
+  
+  if (full_data$mean_matching[m]=='TRUE' & full_data$PD[m]==1){full_data$treatment2[m] = 5}
+  if (full_data$mean_matching[m]=='TRUE' & full_data$PC[m]==1){full_data$treatment2[m] = 6}
+  if (full_data$mean_matching[m]=='TRUE' & full_data$MD[m]==1){full_data$treatment2[m] = 7}
+  if (full_data$mean_matching[m]=='TRUE' & full_data$MC[m]==1){full_data$treatment2[m] = 8}
+}
+
 # drop first 3 subperiod or first 18 seconds
 full_data = subset(full_data, tick>=3)
 full_data = filter(full_data, tick>=36 | num_subperiods==25)
 
+# drop first period of each block
 full_data = filter(full_data, round!=1 & round!=5 & round!=9 & round!=13 & round!=17)
 
 # create unique pairs
@@ -129,31 +160,21 @@ uniqueround = unique(full_data$session_round_id)
 
 # create merge dataset
 merge_data = full_data
-merge_data = merge_data %>% select(-c(p1_code, p1_role, p1_strategy, p1_target, p1_payoff))
-merge_data = merge_data %>% select(-c(p2_code, p2_role, p2_strategy, p2_target, p2_payoff))
-merge_data = merge_data %>% select(-c(p3_code, p3_role, p3_strategy, p3_target, p3_payoff))
-merge_data = merge_data %>% select(-c(p4_code, p4_role, p4_strategy, p4_target, p4_payoff))
-merge_data = merge_data %>% select(-c(p5_code, p5_role, p5_strategy, p5_target, p5_payoff))
-merge_data = merge_data %>% select(-c(p6_code, p6_role, p6_strategy, p6_target, p6_payoff))
-merge_data = merge_data %>% select(-c(p7_code, p7_role, p7_strategy, p7_target, p7_payoff))
-merge_data = merge_data %>% select(-c(p8_code, p8_role, p8_strategy, p8_target, p8_payoff))
-merge_data = merge_data %>% select(-c(p9_code, p9_role, p9_strategy, p9_target, p9_payoff))
-merge_data = merge_data %>% select(-c(p10_code, p10_role, p10_strategy, p10_target, p10_payoff))
-merge_data = merge_data %>% select(-c(p11_code, p11_role, p11_strategy, p11_target, p11_payoff))
-merge_data = merge_data %>% select(-c(p12_code, p12_role, p12_strategy, p12_target, p12_payoff))
-merge_data = merge_data %>% select(-c(player_in_group))
-
-# remove NA data
-merge_data = filter(merge_data, is.na(p1_average)==FALSE & is.na(p2_average)==FALSE)
-
-# drop first 3 subperiod or first 18 seconds
-merge_data = subset(merge_data, tick>=3)
-merge_data = filter(merge_data, tick>=36 | num_subperiods==25)
-
-# drop first period of each block
-merge_data = filter(merge_data, round!=1 & round!=5 & round!=9 & round!=13 & round!=17)
-
-write.csv(merge_data, "/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/production/merge_mm.csv")
+# merge_data = merge_data %>% select(-c(p1_code, p1_role, p1_strategy, p1_target, p1_payoff))
+# merge_data = merge_data %>% select(-c(p2_code, p2_role, p2_strategy, p2_target, p2_payoff))
+# merge_data = merge_data %>% select(-c(p3_code, p3_role, p3_strategy, p3_target, p3_payoff))
+# merge_data = merge_data %>% select(-c(p4_code, p4_role, p4_strategy, p4_target, p4_payoff))
+# merge_data = merge_data %>% select(-c(p5_code, p5_role, p5_strategy, p5_target, p5_payoff))
+# merge_data = merge_data %>% select(-c(p6_code, p6_role, p6_strategy, p6_target, p6_payoff))
+# merge_data = merge_data %>% select(-c(p7_code, p7_role, p7_strategy, p7_target, p7_payoff))
+# merge_data = merge_data %>% select(-c(p8_code, p8_role, p8_strategy, p8_target, p8_payoff))
+# merge_data = merge_data %>% select(-c(p9_code, p9_role, p9_strategy, p9_target, p9_payoff))
+# merge_data = merge_data %>% select(-c(p10_code, p10_role, p10_strategy, p10_target, p10_payoff))
+# merge_data = merge_data %>% select(-c(p11_code, p11_role, p11_strategy, p11_target, p11_payoff))
+# merge_data = merge_data %>% select(-c(p12_code, p12_role, p12_strategy, p12_target, p12_payoff))
+# merge_data = merge_data %>% select(-c(player_in_group))
+write.csv(merge_data, "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/merge_mm.csv")
+rm(merge_data)
 
 
 ##########Create dataset similar to pairwise matching##########
@@ -305,22 +326,17 @@ merge_data$round_pair_id = paste(merge_data$round, merge_data$pair_id,  sep = "_
 merge_data$session_round_pair_id = paste(merge_data$session_code, merge_data$round_pair_id, sep = "_")
 
 # remove NA data
-merge_data = filter(merge_data, is.na(p1_strategy)==FALSE & is.na(p2_strategy)==FALSE)
-
-# drop first 3 subperiod or first 18 seconds
-merge_data = subset(merge_data, tick>=3)
-merge_data = filter(merge_data, tick>=36 | num_subperiods==25)
-
-# drop first period of each block
-merge_data = filter(merge_data, round!=1 & round!=5 & round!=9 & round!=13 & round!=17)
+merge_data = filter(merge_data, is.na(p1_strategy)==FALSE | is.na(p2_strategy)==FALSE)
 
 # write csv file
-write.csv(merge_data, "/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/production/merge_mm.csv")
+write.csv(merge_data, "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/merge_mm.csv")
 rm(data_1, data_2, data_3, data_4, data_5, data_6)
 
 
 ##########Directional learning preparation##########
+# replace wide data with long data
 full_data = merge_data
+rm(merge_data)
 
 # regret and directional learning variables
 full_data = full_data %>% mutate(p1_uhat_a1 = payoff1Aa*p2_average + payoff1Ab*(1-p2_average))
@@ -343,16 +359,7 @@ full_data = full_data %>% mutate(p2_direction = p2_ahat - p2_strategy)
 full_data = full_data %>% mutate(p2_sign = ifelse(p2_direction > 0, 1, ifelse(p2_direction < 0, -1, 0)))
 full_data = full_data %>% mutate(p2_regret_sign = p2_regret * p2_sign)
 
-# treatment variables for regression
-full_data = full_data %>% mutate(dummy_show_worst = ifelse(show_at_worst==TRUE, 1, 0))
-full_data = full_data %>% mutate(dummy_show_best = ifelse(show_best_response==TRUE, 1, 0))
-full_data = full_data %>% mutate(dummy_AMPa = ifelse(game=='AMPa', 1, 0))
-full_data = full_data %>% mutate(dummy_IDDS = ifelse(game=='IDDS', 1, 0))
-full_data = full_data %>% mutate(dummy_mm = 1)
-
-# full_data = full_data %>% mutate(p1_regret_sign_continuous = p1_regret_sign * dummy_continuous)
-# full_data = full_data %>% mutate(p1_regret_sign_showworst = p1_regret_sign * dummy_show_worst)
-# full_data = full_data %>% mutate(p1_regret_sign_showbest = p1_regret_sign * dummy_show_best)
+# add interactive dummies
 full_data = full_data %>% mutate(p1_regret_sign_pure = p1_regret_sign * dummy_pure)
 full_data = full_data %>% mutate(p1_regret_sign_AMPa = p1_regret_sign * dummy_AMPa)
 full_data = full_data %>% mutate(p1_regret_sign_IDDS = p1_regret_sign * dummy_IDDS)
@@ -365,9 +372,6 @@ full_data = full_data %>% mutate(p1_regret_sign_mm_IDDS = p1_regret_sign * dummy
 full_data = full_data %>% mutate(p1_regret_sign_pure_mm_AMPa = p1_regret_sign * dummy_pure * dummy_mm * dummy_AMPa)
 full_data = full_data %>% mutate(p1_regret_sign_pure_mm_IDDS = p1_regret_sign * dummy_pure * dummy_mm * dummy_IDDS)
 
-# full_data = full_data %>% mutate(p2_regret_sign_continuous = p2_regret_sign * dummy_continuous)
-# full_data = full_data %>% mutate(p2_regret_sign_showworst = p2_regret_sign * dummy_show_worst)
-# full_data = full_data %>% mutate(p2_regret_sign_showbest = p2_regret_sign * dummy_show_best)
 full_data = full_data %>% mutate(p2_regret_sign_pure = p2_regret_sign * dummy_pure)
 full_data = full_data %>% mutate(p2_regret_sign_AMPa = p2_regret_sign * dummy_AMPa)
 full_data = full_data %>% mutate(p2_regret_sign_IDDS = p2_regret_sign * dummy_IDDS)
@@ -398,10 +402,10 @@ full_data = full_data %>% mutate(p1_diff_speed = p1_diff / p1_strategy)
 full_data = full_data %>% mutate(p2_diff_speed = p2_diff / p2_strategy)
 
 # export dataset to stata
-write.dta(full_data, "/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/stata/mp_production_mean.dta")
+write.dta(full_data, "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production_mm.dta")
 
 # write csv file
-write.csv(full_data, "/Users/fenix/Dropbox/GSR/Continuous Bimatrix/Matching pennies/production/merge_mm.csv")
+write.csv(full_data, "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/merge_mm.csv")
 
 
 ##########Figure 1 (not used): Individual and population movement##########

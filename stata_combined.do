@@ -380,7 +380,7 @@ xtreg p2_diff p2_sign p2_sign_pure p2_sign_mm p2_sign_8002 p2_sign_IDDS ///
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
-**********Directional learning with lagged regret terms**********
+**********Directional learning with lagged regret terms (not used)**********
 use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear
 xtset session_round_pair_id tick
 
@@ -518,7 +518,7 @@ xtreg p2_diff col_regret_sign col_regret_sign_pure col_regret_sign_mm col_regret
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
-**********data summary table with mean_data (regression)**********
+**********data summary table with time averages (Table 4)**********
 use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_summary.dta", clear
 
 * generate treatment dummies
@@ -603,3 +603,5 @@ test [regne_mean]_cons = [regmid_mean]_cons, accum
 test [regne_mean]_cons = [regmid_mean]_cons
 test [regne_mean]_cons-[regne_mean]mm = [regmid_mean]_cons-[regmid_mean]mm
 
+
+**********data summary table with time averages (Table 3)**********
