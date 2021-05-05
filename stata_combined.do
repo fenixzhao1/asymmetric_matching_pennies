@@ -369,7 +369,7 @@ test [regne_mean]_cons-[regne_mean]mm = [regmid_mean]_cons-[regmid_mean]mm
 
 
 
-**********Fraction of time playing each cycles at pair level
+**********Fraction of time playing each cycles at pair level**********
 * open dataset
 use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_summary_cycle.dta", clear
 
@@ -434,94 +434,34 @@ outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
 **********Directional learning**********
-** Cluster std error at pair level
-* Row player learning
-* regression in continuous time
-use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta", clear
-xtset session_round_pair_id tick
-xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_8002 p1_regret_sign_IDDS ///
-      p1_regret_sign_pure_mm p1_regret_sign_pure_8002 p1_regret_sign_pure_IDDS p1_regret_sign_mm_8002 p1_regret_sign_mm_IDDS /// 
-      p1_regret_sign_pure_mm_8002 p1_regret_sign_pure_mm_IDDS if num_subperiods==0, fe vce(robust)
-outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
-
-* regression in discrete time
-xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_8002 p1_regret_sign_IDDS ///
-      p1_regret_sign_pure_mm p1_regret_sign_pure_8002 p1_regret_sign_pure_IDDS p1_regret_sign_mm_8002 p1_regret_sign_mm_IDDS /// 
-      p1_regret_sign_pure_mm_8002 p1_regret_sign_pure_mm_IDDS if num_subperiods!=0, fe vce(robust)
-outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
-
-* Column player learning
-* regression in continuous time
-xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sign_8002 p2_regret_sign_IDDS ///
-      p2_regret_sign_pure_mm p2_regret_sign_pure_8002 p2_regret_sign_pure_IDDS p2_regret_sign_mm_8002 p2_regret_sign_mm_IDDS /// 
-      p2_regret_sign_pure_mm_8002 p2_regret_sign_pure_mm_IDDS if num_subperiods==0, fe vce(robust)
-outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
-
-* regression in discrete time
-xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sign_8002 p2_regret_sign_IDDS ///
-      p2_regret_sign_pure_mm p2_regret_sign_pure_8002 p2_regret_sign_pure_IDDS p2_regret_sign_mm_8002 p2_regret_sign_mm_IDDS /// 
-      p2_regret_sign_pure_mm_8002 p2_regret_sign_pure_mm_IDDS if num_subperiods!=0, fe vce(robust)
-outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
-
-
-** Bootstrap method
-* Row player learning
-* regression in continuous time
-use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta", clear
-xtset session_round_pair_id tick
-xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_8002 p1_regret_sign_IDDS ///
-      p1_regret_sign_pure_mm p1_regret_sign_pure_8002 p1_regret_sign_pure_IDDS p1_regret_sign_mm_8002 p1_regret_sign_mm_IDDS /// 
-      p1_regret_sign_pure_mm_8002 p1_regret_sign_pure_mm_IDDS if num_subperiods==0, fe vce(bootstrap)
-outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
-
-* regression in discrete time
-xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_8002 p1_regret_sign_IDDS ///
-      p1_regret_sign_pure_mm p1_regret_sign_pure_8002 p1_regret_sign_pure_IDDS p1_regret_sign_mm_8002 p1_regret_sign_mm_IDDS /// 
-      p1_regret_sign_pure_mm_8002 p1_regret_sign_pure_mm_IDDS if num_subperiods!=0, fe vce(bootstrap)
-outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
-
-* Column player learning
-* regression in continuous time
-xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sign_8002 p2_regret_sign_IDDS ///
-      p2_regret_sign_pure_mm p2_regret_sign_pure_8002 p2_regret_sign_pure_IDDS p2_regret_sign_mm_8002 p2_regret_sign_mm_IDDS /// 
-      p2_regret_sign_pure_mm_8002 p2_regret_sign_pure_mm_IDDS if num_subperiods==0, fe vce(bootstrap)
-outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
-
-* regression in discrete time
-xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sign_8002 p2_regret_sign_IDDS ///
-      p2_regret_sign_pure_mm p2_regret_sign_pure_8002 p2_regret_sign_pure_IDDS p2_regret_sign_mm_8002 p2_regret_sign_mm_IDDS /// 
-      p2_regret_sign_pure_mm_8002 p2_regret_sign_pure_mm_IDDS if num_subperiods!=0, fe vce(bootstrap)
-outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
-
-
 ** Bootstrap method without IDDS
 * Row player learning
 * regression in continuous time
 use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta", clear
 drop if game_idds == 1
 xtset session_round_pair_id tick
-xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_8002 ///
-      p1_regret_sign_pure_mm p1_regret_sign_pure_8002 p1_regret_sign_mm_8002 /// 
-      p1_regret_sign_pure_mm_8002 if num_subperiods==0, fe vce(bootstrap)
+xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_AMPa ///
+      p1_regret_sign_pure_mm p1_regret_sign_pure_AMPa p1_regret_sign_mm_AMPa /// 
+      if num_subperiods==0, fe vce(bootstrap)
 outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
 
 * regression in discrete time
-xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_8002 ///
-      p1_regret_sign_pure_mm p1_regret_sign_pure_8002 p1_regret_sign_mm_8002 /// 
-      p1_regret_sign_pure_mm_8002 if num_subperiods!=0, fe vce(bootstrap)
+xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_AMPa ///
+      p1_regret_sign_pure_mm p1_regret_sign_pure_AMPa p1_regret_sign_mm_AMPa ///
+      if num_subperiods!=0, fe vce(bootstrap)
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 * Column player learning
 * regression in continuous time
-xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sign_8002 ///
-      p2_regret_sign_pure_mm p2_regret_sign_pure_8002 p2_regret_sign_mm_8002 /// 
-      p2_regret_sign_pure_mm_8002 if num_subperiods==0, fe vce(bootstrap)
+xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sign_AMPa ///
+      p2_regret_sign_pure_mm p2_regret_sign_pure_AMPa p2_regret_sign_mm_AMPa /// 
+      if num_subperiods==0, fe vce(bootstrap)
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 * regression in discrete time
-xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sign_8002 ///
-      p2_regret_sign_pure_mm p2_regret_sign_pure_8002 p2_regret_sign_mm_8002 /// 
-      p2_regret_sign_pure_mm_8002 if num_subperiods!=0, fe vce(bootstrap)
+xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sign_AMPa ///
+      p2_regret_sign_pure_mm p2_regret_sign_pure_AMPa p2_regret_sign_mm_AMPa /// 
+      if num_subperiods!=0, fe vce(bootstrap)
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
@@ -531,28 +471,28 @@ outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta", clear
 drop if game_idds == 1
 xtset session_round_pair_id tick
-xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_8002 ///
-      p1_regret_sign_pure_mm p1_regret_sign_pure_8002 p1_regret_sign_mm_8002 /// 
-      p1_regret_sign_pure_mm_8002 if num_subperiods==0, fe vce(robust)
+xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_AMPa ///
+      p1_regret_sign_pure_mm p1_regret_sign_pure_AMPa p1_regret_sign_mm_AMPa /// 
+      if num_subperiods==0, fe vce(cluster session_code)
 outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
 
 * regression in discrete time
-xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_8002 ///
-      p1_regret_sign_pure_mm p1_regret_sign_pure_8002 p1_regret_sign_mm_8002 /// 
-      p1_regret_sign_pure_mm_8002 if num_subperiods!=0, fe vce(robust)
+xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_AMPa ///
+      p1_regret_sign_pure_mm p1_regret_sign_pure_AMPa p1_regret_sign_mm_AMPa ///
+      if num_subperiods!=0, fe vce(cluster session_code)
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 * Column player learning
 * regression in continuous time
-xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sign_8002 ///
-      p2_regret_sign_pure_mm p2_regret_sign_pure_8002 p2_regret_sign_mm_8002 /// 
-      p2_regret_sign_pure_mm_8002 if num_subperiods==0, fe vce(robust)
+xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sign_AMPa ///
+      p2_regret_sign_pure_mm p2_regret_sign_pure_AMPa p2_regret_sign_mm_AMPa /// 
+      if num_subperiods==0, fe vce(cluster session_code)
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 * regression in discrete time
-xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sign_8002 ///
-      p2_regret_sign_pure_mm p2_regret_sign_pure_8002 p2_regret_sign_mm_8002 /// 
-      p2_regret_sign_pure_mm_8002 if num_subperiods!=0, fe vce(robust)
+xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sign_AMPa ///
+      p2_regret_sign_pure_mm p2_regret_sign_pure_AMPa p2_regret_sign_mm_AMPa /// 
+      if num_subperiods!=0, fe vce(cluster session_code)
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
