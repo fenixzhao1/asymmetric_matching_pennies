@@ -1,6 +1,6 @@
 **********Data preparation**********
 * open dataset
-use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta", clear
 
 * set subperiod variable
 gen subperiod = 0
@@ -68,29 +68,376 @@ gen second_half = 0
 replace second_half = 1 if subperiod>=13 & dummy_mm==1
 replace second_half = 1 if subperiod>=8 & dummy_mm==0
 
-* drop first period of each priod and early data
-drop if tick <=3 & num_subperiods != 0
-drop if tick <=36 & num_subperiods == 0
-drop if round == 1 & dummy_mm == 1
-drop if round == 5 & dummy_mm == 1
-drop if round == 9 & dummy_mm == 1
-drop if round == 13 & dummy_mm == 1
-drop if round == 17 & dummy_mm == 1
-drop if round == 1 & dummy_mm == 0
-drop if round == 7 & dummy_mm == 0
-drop if round == 13 & dummy_mm == 0
-drop if round == 19 & dummy_mm == 0
-drop if round == 25 & dummy_mm == 0
-
 * save dataset
-save "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", replace
+save "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta", replace
+
+
+
+**********T-test: data summary table with time averages (Table 3)**********
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_summary.dta", clear
+
+gen diff_ne_mid = Deviation_NE - Deviation_Mid
+gen diff_mid_mm = Deviation_Mid - Deviation_MM
+
+* Panel A: AMPa games
+reg diff_ne_mid if game=="AMPa" & match=="mm", cluster(session_id)
+reg diff_mid_mm if game=="AMPa" & match=="mm", cluster(session_id)
+
+reg diff_ne_mid if game=="AMPa" & match=="rp", cluster(session_id)
+reg diff_mid_mm if game=="AMPa" & match=="rp", cluster(session_id)
+
+reg diff_ne_mid if game=="AMPa" & actionsets=="M", cluster(session_id)
+reg diff_mid_mm if game=="AMPa" & actionsets=="M", cluster(session_id)
+
+reg diff_ne_mid if game=="AMPa" & actionsets=="P", cluster(session_id)
+reg diff_mid_mm if game=="AMPa" & actionsets=="P", cluster(session_id)
+
+reg diff_ne_mid if game=="AMPa" & time=="C", cluster(session_id)
+reg diff_mid_mm if game=="AMPa" & time=="C", cluster(session_id)
+
+reg diff_ne_mid if game=="AMPa" & time=="D", cluster(session_id)
+reg diff_mid_mm if game=="AMPa" & time=="D", cluster(session_id)
+
+* Panel B: AMPb games
+reg diff_ne_mid if game=="AMPb" & match=="mm", cluster(session_id)
+reg diff_mid_mm if game=="AMPb" & match=="mm", cluster(session_id)
+
+reg diff_ne_mid if game=="AMPb" & match=="rp", cluster(session_id)
+reg diff_mid_mm if game=="AMPb" & match=="rp", cluster(session_id)
+
+reg diff_ne_mid if game=="AMPb" & actionsets=="M", cluster(session_id)
+reg diff_mid_mm if game=="AMPb" & actionsets=="M", cluster(session_id)
+
+reg diff_ne_mid if game=="AMPb" & actionsets=="P", cluster(session_id)
+reg diff_mid_mm if game=="AMPb" & actionsets=="P", cluster(session_id)
+
+reg diff_ne_mid if game=="AMPb" & time=="C", cluster(session_id)
+reg diff_mid_mm if game=="AMPb" & time=="C", cluster(session_id)
+
+reg diff_ne_mid if game=="AMPb" & time=="D", cluster(session_id)
+reg diff_mid_mm if game=="AMPb" & time=="D", cluster(session_id)
+
+* Panel C: IDDS games
+reg diff_ne_mid if game=="IDDS" & match=="mm", cluster(session_id)
+reg diff_mid_mm if game=="IDDS" & match=="mm", cluster(session_id)
+
+reg diff_ne_mid if game=="IDDS" & match=="rp", cluster(session_id)
+reg diff_mid_mm if game=="IDDS" & match=="rp", cluster(session_id)
+
+reg diff_ne_mid if game=="IDDS" & actionsets=="M", cluster(session_id)
+reg diff_mid_mm if game=="IDDS" & actionsets=="M", cluster(session_id)
+
+reg diff_ne_mid if game=="IDDS" & actionsets=="P", cluster(session_id)
+reg diff_mid_mm if game=="IDDS" & actionsets=="P", cluster(session_id)
+
+reg diff_ne_mid if game=="IDDS" & time=="C", cluster(session_id)
+reg diff_mid_mm if game=="IDDS" & time=="C", cluster(session_id)
+
+reg diff_ne_mid if game=="IDDS" & time=="D", cluster(session_id)
+reg diff_mid_mm if game=="IDDS" & time=="D", cluster(session_id)
+
+
+
+**********T-test: signed distance to NE, MM, and Center for row and column players (Table 4)**********
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_summary.dta", clear
+
+* generate signed distance dependent variables
+gen Diffp1NE = p1_average - p1NEmix
+gen Diffp2NE = p2_average - p2NEmix
+gen Diffp1MM = p1_average - p1MMmix
+gen Diffp2MM = p2_average - p2MMmix
+gen Diffp1Center = p1_average - 0.5
+gen Diffp2Center = p2_average - 0.5
+
+* Panel A: AMPa games
+reg Diffp1NE if game=="AMPa" & match=="mm", cluster(session_id)
+reg Diffp2NE if game=="AMPa" & match=="mm", cluster(session_id)
+reg Diffp1MM if game=="AMPa" & match=="mm", cluster(session_id)
+reg Diffp2MM if game=="AMPa" & match=="mm", cluster(session_id)
+reg Diffp1Center if game=="AMPa" & match=="mm", cluster(session_id)
+reg Diffp2Center if game=="AMPa" & match=="mm", cluster(session_id)
+
+reg Diffp1NE if game=="AMPa" & match=="rp", cluster(session_id)
+reg Diffp2NE if game=="AMPa" & match=="rp", cluster(session_id)
+reg Diffp1MM if game=="AMPa" & match=="rp", cluster(session_id)
+reg Diffp2MM if game=="AMPa" & match=="rp", cluster(session_id)
+reg Diffp1Center if game=="AMPa" & match=="rp", cluster(session_id)
+reg Diffp2Center if game=="AMPa" & match=="rp", cluster(session_id)
+
+reg Diffp1NE if game=="AMPa" & actionsets=="M", cluster(session_id)
+reg Diffp2NE if game=="AMPa" & actionsets=="M", cluster(session_id)
+reg Diffp1MM if game=="AMPa" & actionsets=="M", cluster(session_id)
+reg Diffp2MM if game=="AMPa" & actionsets=="M", cluster(session_id)
+reg Diffp1Center if game=="AMPa" & actionsets=="M", cluster(session_id)
+reg Diffp2Center if game=="AMPa" & actionsets=="M", cluster(session_id)
+
+reg Diffp1NE if game=="AMPa" & actionsets=="P", cluster(session_id)
+reg Diffp2NE if game=="AMPa" & actionsets=="P", cluster(session_id)
+reg Diffp1MM if game=="AMPa" & actionsets=="P", cluster(session_id)
+reg Diffp2MM if game=="AMPa" & actionsets=="P", cluster(session_id)
+reg Diffp1Center if game=="AMPa" & actionsets=="P", cluster(session_id)
+reg Diffp2Center if game=="AMPa" & actionsets=="P", cluster(session_id)
+
+reg Diffp1NE if game=="AMPa" & time=="C", cluster(session_id)
+reg Diffp2NE if game=="AMPa" & time=="C", cluster(session_id)
+reg Diffp1MM if game=="AMPa" & time=="C", cluster(session_id)
+reg Diffp2MM if game=="AMPa" & time=="C", cluster(session_id)
+reg Diffp1Center if game=="AMPa" & time=="C", cluster(session_id)
+reg Diffp2Center if game=="AMPa" & time=="C", cluster(session_id)
+
+reg Diffp1NE if game=="AMPa" & time=="D", cluster(session_id)
+reg Diffp2NE if game=="AMPa" & time=="D", cluster(session_id)
+reg Diffp1MM if game=="AMPa" & time=="D", cluster(session_id)
+reg Diffp2MM if game=="AMPa" & time=="D", cluster(session_id)
+reg Diffp1Center if game=="AMPa" & time=="D", cluster(session_id)
+reg Diffp2Center if game=="AMPa" & time=="D", cluster(session_id)
+
+* Panel B: AMPb games
+reg Diffp1NE if game=="AMPb" & match=="mm", cluster(session_id)
+reg Diffp2NE if game=="AMPb" & match=="mm", cluster(session_id)
+reg Diffp1MM if game=="AMPb" & match=="mm", cluster(session_id)
+reg Diffp2MM if game=="AMPb" & match=="mm", cluster(session_id)
+reg Diffp1Center if game=="AMPb" & match=="mm", cluster(session_id)
+reg Diffp2Center if game=="AMPb" & match=="mm", cluster(session_id)
+
+reg Diffp1NE if game=="AMPb" & match=="rp", cluster(session_id)
+reg Diffp2NE if game=="AMPb" & match=="rp", cluster(session_id)
+reg Diffp1MM if game=="AMPb" & match=="rp", cluster(session_id)
+reg Diffp2MM if game=="AMPb" & match=="rp", cluster(session_id)
+reg Diffp1Center if game=="AMPb" & match=="rp", cluster(session_id)
+reg Diffp2Center if game=="AMPb" & match=="rp", cluster(session_id)
+
+reg Diffp1NE if game=="AMPb" & actionsets=="M", cluster(session_id)
+reg Diffp2NE if game=="AMPb" & actionsets=="M", cluster(session_id)
+reg Diffp1MM if game=="AMPb" & actionsets=="M", cluster(session_id)
+reg Diffp2MM if game=="AMPb" & actionsets=="M", cluster(session_id)
+reg Diffp1Center if game=="AMPb" & actionsets=="M", cluster(session_id)
+reg Diffp2Center if game=="AMPb" & actionsets=="M", cluster(session_id)
+
+reg Diffp1NE if game=="AMPb" & actionsets=="P", cluster(session_id)
+reg Diffp2NE if game=="AMPb" & actionsets=="P", cluster(session_id)
+reg Diffp1MM if game=="AMPb" & actionsets=="P", cluster(session_id)
+reg Diffp2MM if game=="AMPb" & actionsets=="P", cluster(session_id)
+reg Diffp1Center if game=="AMPb" & actionsets=="P", cluster(session_id)
+reg Diffp2Center if game=="AMPb" & actionsets=="P", cluster(session_id)
+
+reg Diffp1NE if game=="AMPb" & time=="C", cluster(session_id)
+reg Diffp2NE if game=="AMPb" & time=="C", cluster(session_id)
+reg Diffp1MM if game=="AMPb" & time=="C", cluster(session_id)
+reg Diffp2MM if game=="AMPb" & time=="C", cluster(session_id)
+reg Diffp1Center if game=="AMPb" & time=="C", cluster(session_id)
+reg Diffp2Center if game=="AMPb" & time=="C", cluster(session_id)
+
+reg Diffp1NE if game=="AMPb" & time=="D", cluster(session_id)
+reg Diffp2NE if game=="AMPb" & time=="D", cluster(session_id)
+reg Diffp1MM if game=="AMPb" & time=="D", cluster(session_id)
+reg Diffp2MM if game=="AMPb" & time=="D", cluster(session_id)
+reg Diffp1Center if game=="AMPb" & time=="D", cluster(session_id)
+reg Diffp2Center if game=="AMPb" & time=="D", cluster(session_id)
+
+* Panel C: IDDS games
+reg Diffp1NE if game=="IDDS" & match=="mm", cluster(session_id)
+reg Diffp2NE if game=="IDDS" & match=="mm", cluster(session_id)
+reg Diffp1MM if game=="IDDS" & match=="mm", cluster(session_id)
+reg Diffp2MM if game=="IDDS" & match=="mm", cluster(session_id)
+reg Diffp1Center if game=="IDDS" & match=="mm", cluster(session_id)
+reg Diffp2Center if game=="IDDS" & match=="mm", cluster(session_id)
+
+reg Diffp1NE if game=="IDDS" & match=="rp", cluster(session_id)
+reg Diffp2NE if game=="IDDS" & match=="rp", cluster(session_id)
+reg Diffp1MM if game=="IDDS" & match=="rp", cluster(session_id)
+reg Diffp2MM if game=="IDDS" & match=="rp", cluster(session_id)
+reg Diffp1Center if game=="IDDS" & match=="rp", cluster(session_id)
+reg Diffp2Center if game=="IDDS" & match=="rp", cluster(session_id)
+
+reg Diffp1NE if game=="IDDS" & actionsets=="M", cluster(session_id)
+reg Diffp2NE if game=="IDDS" & actionsets=="M", cluster(session_id)
+reg Diffp1MM if game=="IDDS" & actionsets=="M", cluster(session_id)
+reg Diffp2MM if game=="IDDS" & actionsets=="M", cluster(session_id)
+reg Diffp1Center if game=="IDDS" & actionsets=="M", cluster(session_id)
+reg Diffp2Center if game=="IDDS" & actionsets=="M", cluster(session_id)
+
+reg Diffp1NE if game=="IDDS" & actionsets=="P", cluster(session_id)
+reg Diffp2NE if game=="IDDS" & actionsets=="P", cluster(session_id)
+reg Diffp1MM if game=="IDDS" & actionsets=="P", cluster(session_id)
+reg Diffp2MM if game=="IDDS" & actionsets=="P", cluster(session_id)
+reg Diffp1Center if game=="IDDS" & actionsets=="P", cluster(session_id)
+reg Diffp2Center if game=="IDDS" & actionsets=="P", cluster(session_id)
+
+reg Diffp1NE if game=="IDDS" & time=="C", cluster(session_id)
+reg Diffp2NE if game=="IDDS" & time=="C", cluster(session_id)
+reg Diffp1MM if game=="IDDS" & time=="C", cluster(session_id)
+reg Diffp2MM if game=="IDDS" & time=="C", cluster(session_id)
+reg Diffp1Center if game=="IDDS" & time=="C", cluster(session_id)
+reg Diffp2Center if game=="IDDS" & time=="C", cluster(session_id)
+
+reg Diffp1NE if game=="IDDS" & time=="D", cluster(session_id)
+reg Diffp2NE if game=="IDDS" & time=="D", cluster(session_id)
+reg Diffp1MM if game=="IDDS" & time=="D", cluster(session_id)
+reg Diffp2MM if game=="IDDS" & time=="D", cluster(session_id)
+reg Diffp1Center if game=="IDDS" & time=="D", cluster(session_id)
+reg Diffp2Center if game=="IDDS" & time=="D", cluster(session_id)
+
+
+
+**********data summary table with time averages (Table 5)**********
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_summary.dta", clear
+
+* drop IDDS
+drop if game == "IDDS"
+
+* generate treatment dummies
+gen continuous = 0
+replace continuous = 1 if time == "C"
+gen pure = 0
+replace pure = 1 if actionsets == "P"
+gen mm = 0
+replace mm = 1 if match == "mm"
+gen AMPa = 0
+replace AMPa = 1 if game == "AMPa"
+
+gen continuous_pure = continuous * pure
+gen continuous_mm = continuous * mm
+gen continuous_AMPa = continuous * AMPa
+gen pure_mm = pure * mm
+gen pure_AMPa = pure * AMPa
+gen mm_AMPa = mm * AMPa
+gen continuous_pure_mm = continuous * pure * mm  
+gen continuous_pure_AMPa = continuous * pure * AMPa
+gen continuous_mm_AMPa = continuous * mm * AMPa
+gen pure_mm_AMPa = pure * mm * AMPa
+gen continuous_pure_mm_AMPa = continuous * pure * mm * AMPa 
+
+
+** regressions with cluster std error at session level 
+reg Deviation_NE continuous pure mm AMPa continuous_pure continuous_mm continuous_AMPa ///
+    pure_mm pure_AMPa mm_AMPa, vce(cluster session_id)
+outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
+
+reg Deviation_MM continuous pure mm AMPa continuous_pure continuous_mm continuous_AMPa ///
+    pure_mm pure_AMPa mm_AMPa, vce(cluster session_id)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+reg Deviation_Mid continuous pure mm AMPa continuous_pure continuous_mm continuous_AMPa ///
+    pure_mm pure_AMPa mm_AMPa, vce(cluster session_id)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+reg sd_geometric continuous pure mm AMPa continuous_pure continuous_mm continuous_AMPa ///
+    pure_mm pure_AMPa mm_AMPa, vce(cluster session_id)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+
+** regressions with bootstrap
+reg Deviation_NE continuous pure mm AMPa continuous_pure continuous_mm continuous_AMPa ///
+    pure_mm pure_AMPa mm_AMPa, vce(bootstrap)
+est store regne
+outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
+
+reg Deviation_MM continuous pure mm AMPa continuous_pure continuous_mm continuous_AMPa ///
+    pure_mm pure_AMPa mm_AMPa, vce(bootstrap)
+est store regmm
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+reg Deviation_Mid continuous pure mm AMPa continuous_pure continuous_mm continuous_AMPa ///
+    pure_mm pure_AMPa mm_AMPa, vce(bootstrap)
+est store regmid
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+reg sd_geometric continuous pure mm AMPa continuous_pure continuous_mm continuous_AMPa ///
+    pure_mm pure_AMPa mm_AMPa, vce(bootstrap)
+est store regsd
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+/*
+** comparison of coefficients for the four bootstrap regression above
+reg Deviation_NE continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
+    pure_mm pure_g8002 mm_g8002
+est store regne
+reg Deviation_MM continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
+    pure_mm pure_g8002 mm_g8002
+est store regmm
+reg Deviation_Mid continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
+    pure_mm pure_g8002 mm_g8002
+est store regmid
+
+suest regne regmm regmid, vce(cluster session_id)
+test [regmm_mean]_cons = [regne_mean]_cons
+test [regne_mean]_cons = [regmid_mean]_cons, accum
+test [regne_mean]_cons = [regmid_mean]_cons
+test [regne_mean]_cons-[regne_mean]mm = [regmid_mean]_cons-[regmid_mean]mm
+*/
+
+
+
+**********Fraction of time playing each cycles at pair level
+* open dataset
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_summary_cycle.dta", clear
+
+* generate treatment dummies
+gen continuous = 0
+replace continuous = 1 if time == "C"
+gen pure = 0
+replace pure = 1 if actionsets == "P"
+gen mm = 0
+replace mm = 1 if match == "mm"
+gen AMPa = 0
+replace AMPa = 1 if game == "AMPa"
+
+gen continuous_pure = continuous * pure
+gen continuous_mm = continuous * mm
+gen continuous_AMPa = continuous * AMPa
+gen pure_mm = pure * mm
+gen pure_AMPa = pure * AMPa
+gen mm_AMPa = mm * AMPa
+gen continuous_pure_mm = continuous * pure * mm  
+gen continuous_pure_AMPa = continuous * pure * AMPa
+gen continuous_mm_AMPa = continuous * mm * AMPa
+gen pure_mm_AMPa = pure * mm * AMPa
+gen continuous_pure_mm_AMPa = continuous * pure * mm * AMPa 
+
+
+** regressions with cluster std error at session level 
+reg cw continuous pure mm AMPa continuous_pure continuous_mm continuous_AMPa ///
+    pure_mm pure_AMPa mm_AMPa, vce(cluster session_id)
+outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
+
+reg ccw continuous pure mm AMPa continuous_pure continuous_mm continuous_AMPa ///
+    pure_mm pure_AMPa mm_AMPa, vce(cluster session_id)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+reg diagonal continuous pure mm AMPa continuous_pure continuous_mm continuous_AMPa ///
+    pure_mm pure_AMPa mm_AMPa, vce(cluster session_id)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+reg stay continuous pure mm AMPa continuous_pure continuous_mm continuous_AMPa ///
+    pure_mm pure_AMPa mm_AMPa, vce(cluster session_id)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+
+** regressions with bootstrap
+reg cw continuous pure mm AMPa continuous_pure continuous_mm continuous_AMPa ///
+    pure_mm pure_AMPa mm_AMPa, vce(bootstrap)
+outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
+
+reg ccw continuous pure mm AMPa continuous_pure continuous_mm continuous_AMPa ///
+    pure_mm pure_AMPa mm_AMPa, vce(bootstrap)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+reg diagonal continuous pure mm AMPa continuous_pure continuous_mm continuous_AMPa ///
+    pure_mm pure_AMPa mm_AMPa, vce(bootstrap)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+reg stay continuous pure mm AMPa continuous_pure continuous_mm continuous_AMPa ///
+    pure_mm pure_AMPa mm_AMPa, vce(bootstrap)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
 
 
 **********Directional learning**********
 ** Cluster std error at pair level
 * Row player learning
 * regression in continuous time
-use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta", clear
 xtset session_round_pair_id tick
 xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_8002 p1_regret_sign_IDDS ///
       p1_regret_sign_pure_mm p1_regret_sign_pure_8002 p1_regret_sign_pure_IDDS p1_regret_sign_mm_8002 p1_regret_sign_mm_IDDS /// 
@@ -120,7 +467,7 @@ outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 ** Bootstrap method
 * Row player learning
 * regression in continuous time
-use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta", clear
 xtset session_round_pair_id tick
 xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_8002 p1_regret_sign_IDDS ///
       p1_regret_sign_pure_mm p1_regret_sign_pure_8002 p1_regret_sign_pure_IDDS p1_regret_sign_mm_8002 p1_regret_sign_mm_IDDS /// 
@@ -150,7 +497,7 @@ outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 ** Bootstrap method without IDDS
 * Row player learning
 * regression in continuous time
-use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta", clear
 drop if game_idds == 1
 xtset session_round_pair_id tick
 xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_8002 ///
@@ -181,7 +528,7 @@ outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 ** Cluster std error without IDDS
 * Row player learning
 * regression in continuous time
-use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta", clear
 drop if game_idds == 1
 xtset session_round_pair_id tick
 xtreg p1_diff p1_regret_sign p1_regret_sign_pure p1_regret_sign_mm p1_regret_sign_8002 ///
@@ -209,8 +556,9 @@ xtreg p2_diff p2_regret_sign p2_regret_sign_pure p2_regret_sign_mm p2_regret_sig
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
+
 **********Directional learning (combine C and D treatments)**********
-use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta", clear
 drop if game_idds == 1
 
 * rescale regret terms by time treatments
@@ -268,9 +616,10 @@ xtreg p2_diff p2_regret_sign_scale p2_continuous p2_pure p2_mm p2_AMPa ///
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
+
 **********BR learning**********
 * add independent variables
-use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta", clear
 
 gen p1_direction_pure = p1_direction * dummy_pure
 gen p1_direction_mm = p1_direction * dummy_mm
@@ -324,9 +673,10 @@ xtreg p2_diff p2_direction p2_direction_pure p2_direction_mm p2_direction_8002 p
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
+
 **********Pure directional learning**********
 * add independent variables
-use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta", clear
 
 gen p1_sign_pure = p1_sign * dummy_pure
 gen p1_sign_mm = p1_sign * dummy_mm
@@ -380,8 +730,9 @@ xtreg p2_diff p2_sign p2_sign_pure p2_sign_mm p2_sign_8002 p2_sign_IDDS ///
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
+
 **********Directional learning with lagged regret terms (not used)**********
-use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta", clear
 xtset session_round_pair_id tick
 
 * generate lag regret terms for row player
@@ -448,8 +799,9 @@ xtreg p2_diff p2_regret_sign p2_regret_sign_L1 ///
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
+
 **********Directional learning with discrete (small, medium, large) regret**********
-use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_production.dta", clear
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta", clear
 xtset session_round_pair_id tick
 
 * reform the regret data
@@ -518,90 +870,8 @@ xtreg p2_diff col_regret_sign col_regret_sign_pure col_regret_sign_mm col_regret
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
-**********data summary table with time averages (Table 4)**********
-use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/stata/mp_summary.dta", clear
-
-* generate treatment dummies
-gen continuous = 0
-replace continuous = 1 if num_subperiods == 0
-gen pure = 0
-replace pure = 1 if pure_strategy == 1
-gen mm = 0
-replace mm = 1 if mean_matching == 1
-gen g8002 = 0
-replace g8002 = 1 if game == 2
-
-gen continuous_pure = continuous * pure
-gen continuous_mm = continuous * mm
-gen continuous_g8002 = continuous * g8002
-gen pure_mm = pure * mm
-gen pure_g8002 = pure * g8002
-gen mm_g8002 = mm * g8002
-gen continuous_pure_mm = continuous * pure * mm  
-gen continuous_pure_g8002 = continuous * pure * g8002 
-gen continuous_mm_g8002 = continuous * mm * g8002
-gen pure_mm_g8002 = pure * mm * g8002
-gen continuous_pure_mm_g8002 = continuous * pure * mm * g8002 
-
-* drop IDDS
-drop if game == 3
-
-** regressions with cluster std error at pair level 
-reg Deviation_NE continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
-    pure_mm pure_g8002 mm_g8002, vce(cluster session_id)
-outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
-
-reg Deviation_MM continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
-    pure_mm pure_g8002 mm_g8002, vce(cluster session_id)
-outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
-
-reg Deviation_Mid continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
-    pure_mm pure_g8002 mm_g8002, vce(cluster session_id)
-outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
-
-reg sd_geometric continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
-    pure_mm pure_g8002 mm_g8002, vce(cluster session_id)
-outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
-** regressions with bootstrap
-reg Deviation_NE continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
-    pure_mm pure_g8002 mm_g8002, vce(bootstrap)
-est store regne
-outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
-
-reg Deviation_MM continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
-    pure_mm pure_g8002 mm_g8002, vce(bootstrap)
-est store regmm
-outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
-
-reg Deviation_Mid continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
-    pure_mm pure_g8002 mm_g8002, vce(bootstrap)
-est store regmid
-outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
-
-reg sd_geometric continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
-    pure_mm pure_g8002 mm_g8002, vce(bootstrap)
-est store regsd
-outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
-** comparison of coefficients for the four bootstrap regression above
-reg Deviation_NE continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
-    pure_mm pure_g8002 mm_g8002
-est store regne
-reg Deviation_MM continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
-    pure_mm pure_g8002 mm_g8002
-est store regmm
-reg Deviation_Mid continuous pure mm g8002 continuous_pure continuous_mm continuous_g8002 ///
-    pure_mm pure_g8002 mm_g8002
-est store regmid
 
-suest regne regmm regmid, vce(cluster session_id)
-test [regmm_mean]_cons = [regne_mean]_cons
-test [regne_mean]_cons = [regmid_mean]_cons, accum
-test [regne_mean]_cons = [regmid_mean]_cons
-test [regne_mean]_cons-[regne_mean]mm = [regmid_mean]_cons-[regmid_mean]mm
-
-
-**********data summary table with time averages (Table 3)**********

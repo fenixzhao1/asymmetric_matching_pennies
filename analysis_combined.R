@@ -31,6 +31,123 @@ treatmenttype = unique(full_data$treatmentfull)
 write.dta(full_data, "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta")
 
 
+##########Data preparation for cyclical behavior##########
+## add cycle type variables and related dummies
+full_data = full_data %>% mutate(cyctype = 'initial')
+
+# loop over observations
+for (m in 1:(length(full_data$tick)-1)){
+  
+  # only consider the data in the same session_round_pair_id group
+  if (full_data$session_round_pair_id[m] == full_data$session_round_pair_id[m+1]){
+    
+    # cyclical behaivor at region 1
+    if (full_data$p1_average[m]>=full_data$p1NEmix[m] & full_data$p2_average[m]>full_data$p2NEmix[m]){
+      if (full_data$p1_average[m+1]>=full_data$p1_average[m] & full_data$p2_average[m+1]<=full_data$p2_average[m])
+      {full_data$cyctype[m+1] = "CW"}
+      if (full_data$p1_average[m+1]<=full_data$p1_average[m] & full_data$p2_average[m+1]>=full_data$p2_average[m])
+      {full_data$cyctype[m+1] = "CCW"}
+      if (full_data$p1_average[m+1]<full_data$p1_average[m] & full_data$p2_average[m+1]<full_data$p2_average[m])
+      {full_data$cyctype[m+1] = "Diagonal"}
+      if (full_data$p1_average[m+1]>full_data$p1_average[m] & full_data$p2_average[m+1]>full_data$p2_average[m])
+      {full_data$cyctype[m+1] = "Cdiagonal"}
+      if (full_data$p1_average[m+1]==full_data$p1_average[m] & full_data$p2_average[m+1]==full_data$p2_average[m])
+      {full_data$cyctype[m+1] = "Stay"}
+    }
+    
+    # cyclical behaivor at region 2
+    if (full_data$p1_average[m]>full_data$p1NEmix[m] & full_data$p2_average[m]<=full_data$p2NEmix[m]){
+      if (full_data$p1_average[m+1]<=full_data$p1_average[m] & full_data$p2_average[m+1]<=full_data$p2_average[m])
+      {full_data$cyctype[m+1] = "CW"}
+      if (full_data$p1_average[m+1]>=full_data$p1_average[m] & full_data$p2_average[m+1]>=full_data$p2_average[m])
+      {full_data$cyctype[m+1] = "CCW"}
+      if (full_data$p1_average[m+1]<full_data$p1_average[m] & full_data$p2_average[m+1]>full_data$p2_average[m])
+      {full_data$cyctype[m+1] = "Diagonal"}
+      if (full_data$p1_average[m+1]>full_data$p1_average[m] & full_data$p2_average[m+1]<full_data$p2_average[m])
+      {full_data$cyctype[m+1] = "Cdiagonal"}
+      if (full_data$p1_average[m+1]==full_data$p1_average[m] & full_data$p2_average[m+1]==full_data$p2_average[m])
+      {full_data$cyctype[m+1] = "Stay"}
+    }
+    
+    # cyclical behaivor at region 3
+    if (full_data$p1_average[m]<full_data$p1NEmix[m] & full_data$p2_average[m]>=full_data$p2NEmix[m]){
+      if (full_data$p1_average[m+1]>=full_data$p1_average[m] & full_data$p2_average[m+1]>=full_data$p2_average[m])
+      {full_data$cyctype[m+1] = "CW"}
+      if (full_data$p1_average[m+1]<=full_data$p1_average[m] & full_data$p2_average[m+1]<=full_data$p2_average[m])
+      {full_data$cyctype[m+1] = "CCW"}
+      if (full_data$p1_average[m+1]>full_data$p1_average[m] & full_data$p2_average[m+1]<full_data$p2_average[m])
+      {full_data$cyctype[m+1] = "Diagonal"}
+      if (full_data$p1_average[m+1]<full_data$p1_average[m] & full_data$p2_average[m+1]>full_data$p2_average[m])
+      {full_data$cyctype[m+1] = "Cdiagonal"}
+      if (full_data$p1_average[m+1]==full_data$p1_average[m] & full_data$p2_average[m+1]==full_data$p2_average[m])
+      {full_data$cyctype[m+1] = "Stay"}
+    }
+    
+    # cyclical behaivor at region 4
+    if (full_data$p1_average[m]<=full_data$p1NEmix[m] & full_data$p2_average[m]<full_data$p2NEmix[m]){
+      if (full_data$p1_average[m+1]<=full_data$p1_average[m] & full_data$p2_average[m+1]>=full_data$p2_average[m])
+      {full_data$cyctype[m+1] = "CW"}
+      if (full_data$p1_average[m+1]>=full_data$p1_average[m] & full_data$p2_average[m+1]<=full_data$p2_average[m])
+      {full_data$cyctype[m+1] = "CCW"}
+      if (full_data$p1_average[m+1]>full_data$p1_average[m] & full_data$p2_average[m+1]>full_data$p2_average[m])
+      {full_data$cyctype[m+1] = "Diagonal"}
+      if (full_data$p1_average[m+1]<full_data$p1_average[m] & full_data$p2_average[m+1]<full_data$p2_average[m])
+      {full_data$cyctype[m+1] = "Cdiagonal"}
+      if (full_data$p1_average[m+1]==full_data$p1_average[m] & full_data$p2_average[m+1]==full_data$p2_average[m])
+      {full_data$cyctype[m+1] = "Stay"}
+    }
+  }
+  else{next}
+}
+
+full_data = full_data %>% mutate(
+  d_cw = ifelse(cyctype=='CW', 1, 0),
+  d_ccw = ifelse(cyctype=='CCW', 1, 0),
+  d_diagonal = ifelse(cyctype=='Diagonal', 1, 0),
+  d_cdiagonal = ifelse(cyctype=='Cdiagonal', 1, 0),
+  d_stay = ifelse(cyctype=='Stay', 1, 0)
+)
+
+# drop IDDS and initial points
+last_data = filter(full_data, cyctype!='initial')
+
+## calculate fraction of time playing each type by groups
+# create empty dataset
+length = rep(NA, length(uniqueID))
+mean_data = data.frame(session_id = length, group_id = length, treatments = length,
+                       time = length, actionsets = length, match = length, game = length,
+                       cw = length, ccw = length, diagonal = length, cdiagonal = length, stay = length,
+                       p1_average = length, p2_average = length, total = length)
+
+# loop over group_id
+for (i in 1:length(uniqueID)){
+  round_data = subset(last_data, group_id == uniqueID[i])
+  
+  # fill in the mean_data row i
+  mean_data$session_id[i] = as.character(round_data$session_code[1])
+  mean_data$group_id[i] = as.character(round_data$group_id[1])
+  mean_data$time[i] = as.character(round_data$time[1])
+  mean_data$actionsets[i] = as.character(round_data$actionsets[1])
+  mean_data$match[i] = as.character(round_data$match[1])
+  mean_data$game[i] = as.character(round_data$game[1])
+  mean_data$treatments[i] = as.character(round_data$treatmentfull[1])
+  
+  mean_data$p1_average[i] = mean(round_data$p1_strategy)
+  mean_data$p2_average[i] = mean(round_data$p2_strategy)
+  
+  mean_data$cw[i] = mean(round_data$d_cw)
+  mean_data$ccw[i] = mean(round_data$d_ccw)
+  mean_data$diagonal[i] = mean(round_data$d_diagonal)
+  mean_data$cdiagonal[i] = mean(round_data$d_cdiagonal)
+  mean_data$stay[i] = mean(round_data$d_stay)
+  mean_data$total[i] = mean_data$cw[i] + mean_data$ccw[i] + mean_data$diagonal[i] + mean_data$cdiagonal[i] + mean_data$stay[i]
+}
+
+mean_data = arrange(mean_data, group_id)
+mean_data = filter(mean_data, game!='IDDS')
+write.dta(mean_data, "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_summary_cycle.dta")
+
+
 ##########Descriptive figure: QRE precision function heatmap##########
 # read data from gambit
 qre_data = read.csv("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/gambit/qre_8002.csv", header = T)
@@ -300,7 +417,7 @@ for (i in 1:length(gametype)){
 rm(game_data, mean_data, pic, qre_data, qre_precision, rec1, rec2, round_data)
 
 
-##########Table (TBC): Mean data of time average by treatments##########
+##########Table: Mean data of time average by treatments##########
 ## build summary data
 last_data = full_data
 # keep the last 30 seconds
@@ -694,36 +811,170 @@ xtable(median_table[[3]],digits=3,caption="Distance to predictions.")
 rm(data1, data2, median_table, test, mean_data, game_data)
 
 
-##########Table (TBC): Mean data of time average and compare NE MM Center with loglikelihood##########
+##########Table: Mean data of time average compared to NE, MM, Center##########
+## build summary data
+last_data = full_data
+
 # create empty dataset
 length = rep(NA, length(uniqueID))
-mean_data = data.frame(session_id = length, session_round_id = length, 
-                       p1_average = length, p2_average = length,
-                       num_subperiods = length, pure_strategy = length, 
-                       mean_matching = length, game = length, 
-                       p1NEmix = length, p2NEmix = length, p1MMmix = length, p2MMmix = length, 
-                       treatment = length, treatment2 = length,
-                       ll_nash = length, ll_mm = length, ll_center = length, ll_mle = length)
+mean_data = data.frame(session_id = length, group_id = length, treatments = length,
+                       p1_average = length, p2_average = length, p1_median = length, p2_median = length, 
+                       p1_q1 = length, p2_q1 = length, p1_q3 = length, p2_q3 = length, 
+                       sd_p1 = length, sd_p2 = length, p1_payoff = length, p2_payoff = length,
+                       p1NEmix = length, p2NEmix = length, p1MMmix = length, p2MMmix = length,
+                       time = length, actionsets = length, match = length, game = length)
 
-# loop over session_id(periods)
+# loop over group_id
 for (i in 1:length(uniqueID)){
-  round_data = subset(full_data, session_round_id == uniqueID[i])
+  round_data = subset(last_data, group_id == uniqueID[i])
   
   # fill in the mean_data row i
-  mean_data$session_id[i] = round_data$session_code[1]
-  mean_data$session_round_id[i] = round_data$session_round_id[1]
+  mean_data$session_id[i] = as.character(round_data$session_code[1])
+  mean_data$group_id[i] = as.character(round_data$group_id[1])
+  
   mean_data$p1_average[i] = mean(round_data$p1_strategy)
   mean_data$p2_average[i] = mean(round_data$p2_strategy)
-  mean_data$num_subperiods[i] = round_data$num_subperiods[1]
-  mean_data$pure_strategy[i] = round_data$pure_strategy[1]
-  mean_data$mean_matching[i] = round_data$mean_matching[1]
-  mean_data$game[i] = round_data$game[1]
+  mean_data$p1_median[i] = median(round_data$p1_strategy)
+  mean_data$p2_median[i] = median(round_data$p2_strategy)
+  mean_data$p1_q1[i] = quantile(round_data$p1_strategy, 0.25)
+  mean_data$p1_q3[i] = quantile(round_data$p1_strategy, 0.75)
+  mean_data$p2_q1[i] = quantile(round_data$p2_strategy, 0.25)
+  mean_data$p2_q3[i] = quantile(round_data$p2_strategy, 0.75)
+  mean_data$sd_p1[i] = sd(round_data$p1_strategy)
+  mean_data$sd_p2[i] = sd(round_data$p2_strategy)
+  
   mean_data$p1NEmix[i] = round_data$p1NEmix[1]
   mean_data$p2NEmix[i] = round_data$p2NEmix[1]
   mean_data$p1MMmix[i] = round_data$p1MMmix[1]
   mean_data$p2MMmix[i] = round_data$p2MMmix[1]
-  mean_data$treatment[i] = round_data$treatment[1]
-  mean_data$treatment2[i] = round_data$treatment2[1]
+  mean_data$p1_payoff[i] = mean(round_data$p1_payoff)
+  mean_data$p2_payoff[i] = mean(round_data$p2_payoff)
+  
+  mean_data$time[i] = as.character(round_data$time[1])
+  mean_data$actionsets[i] = as.character(round_data$actionsets[1])
+  mean_data$match[i] = as.character(round_data$match[1])
+  mean_data$game[i] = as.character(round_data$game[1])
+  mean_data$treatments[i] = as.character(round_data$treatmentfull[1])
+}
+
+mean_data = arrange(mean_data, group_id)
+
+# add necessary variables
+mean_data = mean_data %>% mutate(
+  Diffp1NE = p1_average - p1NEmix,
+  Diffp2NE = p2_average - p2NEmix,
+  Diffp1MM = p1_average - p1MMmix,
+  Diffp2MM = p2_average - p2MMmix,
+  Diffp1Center = p1_average - 0.5,
+  Diffp2Center = p2_average - 0.5)
+
+## Generate Table 4
+# load package
+library(MASS)
+
+# create list
+median_table = list()
+
+# loop over game
+for (i in 1:length(gametype)){
+  game_data = subset(mean_data, game == gametype[i])
+  
+  median_table[[i]] = matrix(0, nrow = 6, ncol = 6)
+  rownames(median_table[[i]]) = c('mm', 'rp', 'Mixed', 'Pure', 'Continuous', 'Discrete')
+  colnames(median_table[[i]]) = c('row to NE', 'col to NE', 'row to MM', 'col to MM',
+                                  'rol to Center', 'col to Center')
+  
+  # mm vs rp
+  data1 = subset(game_data, match == 'mm')
+  median_table[[i]][1,1] = mean(data1$Diffp1NE)
+  median_table[[i]][1,2] = mean(data1$Diffp2NE)
+  median_table[[i]][1,3] = mean(data1$Diffp1MM)
+  median_table[[i]][1,4] = mean(data1$Diffp2MM)
+  median_table[[i]][1,5] = mean(data1$Diffp1Center)
+  median_table[[i]][1,6] = mean(data1$Diffp2Center)
+  
+  data2 = subset(game_data, match == 'rp')
+  median_table[[i]][2,1] = mean(data2$Diffp1NE)
+  median_table[[i]][2,2] = mean(data2$Diffp2NE)
+  median_table[[i]][2,3] = mean(data2$Diffp1MM)
+  median_table[[i]][2,4] = mean(data2$Diffp2MM)
+  median_table[[i]][2,5] = mean(data2$Diffp1Center)
+  median_table[[i]][2,6] = mean(data2$Diffp2Center)
+  
+  # mixed vs pure
+  data1 = subset(game_data, actionsets == 'M')
+  median_table[[i]][3,1] = mean(data1$Diffp1NE)
+  median_table[[i]][3,2] = mean(data1$Diffp2NE)
+  median_table[[i]][3,3] = mean(data1$Diffp1MM)
+  median_table[[i]][3,4] = mean(data1$Diffp2MM)
+  median_table[[i]][3,5] = mean(data1$Diffp1Center)
+  median_table[[i]][3,6] = mean(data1$Diffp2Center)
+  
+  data2 = subset(game_data, actionsets == 'P')
+  median_table[[i]][4,1] = mean(data2$Diffp1NE)
+  median_table[[i]][4,2] = mean(data2$Diffp2NE)
+  median_table[[i]][4,3] = mean(data2$Diffp1MM)
+  median_table[[i]][4,4] = mean(data2$Diffp2MM)
+  median_table[[i]][4,5] = mean(data2$Diffp1Center)
+  median_table[[i]][4,6] = mean(data2$Diffp2Center)
+  
+  # continuous vs discrete
+  data1 = subset(game_data, time == 'C')
+  median_table[[i]][5,1] = mean(data1$Diffp1NE)
+  median_table[[i]][5,2] = mean(data1$Diffp2NE)
+  median_table[[i]][5,3] = mean(data1$Diffp1MM)
+  median_table[[i]][5,4] = mean(data1$Diffp2MM)
+  median_table[[i]][5,5] = mean(data1$Diffp1Center)
+  median_table[[i]][5,6] = mean(data1$Diffp2Center)
+  
+  data2 = subset(game_data, time == 'D')
+  median_table[[i]][6,1] = mean(data2$Diffp1NE)
+  median_table[[i]][6,2] = mean(data2$Diffp2NE)
+  median_table[[i]][6,3] = mean(data2$Diffp1MM)
+  median_table[[i]][6,4] = mean(data2$Diffp2MM)
+  median_table[[i]][6,5] = mean(data2$Diffp1Center)
+  median_table[[i]][6,6] = mean(data2$Diffp2Center)
+}
+
+xtable(head(median_table[[1]]),digits=3,caption="Distance to predictions.")
+xtable(head(median_table[[2]]),digits=3,caption="Distance to predictions.")
+xtable(head(median_table[[3]]),digits=3,caption="Distance to predictions.")
+
+rm(game_data, last_data, round_data, mean_data, data1, data2, median_table)
+
+
+##########Table: Mean data of time average and compare NE MM Center with loglikelihood##########
+# keep data
+last_data = full_data
+
+# create empty dataset
+length = rep(NA, length(uniqueID))
+mean_data = data.frame(session_id = length, group_id = length, treatments = length,
+                       p1_average = length, p2_average = length, p1_median = length, p2_median = length, 
+                       p1NEmix = length, p2NEmix = length, p1MMmix = length, p2MMmix = length,
+                       time = length, actionsets = length, match = length, game = length,
+                       LL_NE = length, LL_MM = length, LL_Center = length, LL_MLE = length)
+
+# loop over group_id
+for (i in 1:length(uniqueID)){
+  round_data = subset(last_data, group_id == uniqueID[i])
+  
+  # fill in the mean_data row i
+  mean_data$session_id[i] = as.character(round_data$session_code[1])
+  mean_data$group_id[i] = as.character(round_data$group_id[1])
+  mean_data$p1_average[i] = mean(round_data$p1_strategy)
+  mean_data$p2_average[i] = mean(round_data$p2_strategy)
+  mean_data$p1_median[i] = median(round_data$p1_strategy)
+  mean_data$p2_median[i] = median(round_data$p2_strategy)
+  mean_data$p1NEmix[i] = round_data$p1NEmix[1]
+  mean_data$p2NEmix[i] = round_data$p2NEmix[1]
+  mean_data$p1MMmix[i] = round_data$p1MMmix[1]
+  mean_data$p2MMmix[i] = round_data$p2MMmix[1]
+  mean_data$time[i] = as.character(round_data$time[1])
+  mean_data$actionsets[i] = as.character(round_data$actionsets[1])
+  mean_data$match[i] = as.character(round_data$match[1])
+  mean_data$game[i] = as.character(round_data$game[1])
+  mean_data$treatments[i] = as.character(round_data$treatmentfull[1])
   
   # fill in the loglikelihood wrt NE
   mu1 = round_data$p1NEmix[1]
@@ -734,7 +985,7 @@ for (i in 1:length(uniqueID)){
   x2 = mean(round_data$p2_strategy)
   pho = 0
   z = (x1-mu1)^2/(sig1^2) + (x2-mu2)^2/(sig2^2) - 2*pho*(x1-mu1)*(x2-mu2)/(sig1*sig2)
-  mean_data$ll_nash[i] = -z/(2*(1-pho^2)) - log(2*pi*sig1*sig2*sqrt(1-pho^2))
+  mean_data$LL_NE[i] = -z/(2*(1-pho^2)) - log(2*pi*sig1*sig2*sqrt(1-pho^2))
   
   # fill in the loglikelihood wrt MM
   mu1 = round_data$p1MMmix[1]
@@ -745,7 +996,7 @@ for (i in 1:length(uniqueID)){
   x2 = mean(round_data$p2_strategy)
   pho = 0
   z = (x1-mu1)^2/(sig1^2) + (x2-mu2)^2/(sig2^2) - 2*pho*(x1-mu1)*(x2-mu2)/(sig1*sig2)
-  mean_data$ll_mm[i] = -z/(2*(1-pho^2)) - log(2*pi*sig1*sig2*sqrt(1-pho^2))
+  mean_data$LL_MM[i] = -z/(2*(1-pho^2)) - log(2*pi*sig1*sig2*sqrt(1-pho^2))
   
   # fill in the loglikelihood wrt center
   mu1 = 0.5
@@ -756,7 +1007,7 @@ for (i in 1:length(uniqueID)){
   x2 = mean(round_data$p2_strategy)
   pho = 0
   z = (x1-mu1)^2/(sig1^2) + (x2-mu2)^2/(sig2^2) - 2*pho*(x1-mu1)*(x2-mu2)/(sig1*sig2)
-  mean_data$ll_center[i] = -z/(2*(1-pho^2)) - log(2*pi*sig1*sig2*sqrt(1-pho^2))
+  mean_data$LL_Center[i] = -z/(2*(1-pho^2)) - log(2*pi*sig1*sig2*sqrt(1-pho^2))
   
   # fill in the loglikelihood wrt sample mean
   x1 = mean(round_data$p1_strategy)
@@ -767,14 +1018,14 @@ for (i in 1:length(uniqueID)){
   sig2 = x2 * (1-x2)
   pho = cor(round_data$p1_strategy, round_data$p2_strategy)
   z = (x1-mu1)^2/(sig1^2) + (x2-mu2)^2/(sig2^2) - 2*pho*(x1-mu1)*(x2-mu2)/(sig1*sig2)
-  mean_data$ll_mle[i] = -z/(2*(1-pho^2)) - log(2*pi*sig1*sig2*sqrt(1-pho^2))
+  mean_data$LL_MLE[i] = -z/(2*(1-pho^2)) - log(2*pi*sig1*sig2*sqrt(1-pho^2))
 }
 
-mean_data = arrange(mean_data, session_round_id)
+mean_data = arrange(mean_data, group_id)
 
 # Generate the Table
 # drop IDDS
-mean_data = filter(mean_data, game != 3)
+mean_data = filter(mean_data, game != 'IDDS')
 
 # load package
 library(MASS)
@@ -783,61 +1034,57 @@ library(MASS)
 median_table = list()
 
 # loop over game
-for (i in 1:length(gametype)){
-  game_data = subset(mean_data, game == i)
+for (i in 1:2){
+  game_data = subset(mean_data, game == gametype[i])
   
-  median_table[[i]] = matrix(0, nrow = 6, ncol = 5)
+  median_table[[i]] = matrix(0, nrow = 6, ncol = 4)
   rownames(median_table[[i]]) = c('mm', 'rp', 'Mixed', 'Pure', 'Continuous', 'Discrete')
-  colnames(median_table[[i]]) = c('ll wrt NE', 'll wrt Center', 'll wrt MM', 'll wrt mle', 'Num of Pairs')
+  colnames(median_table[[i]]) = c('LL wrt NE', 'LL wrt Center', 'LL wrt MM', 'Num of Groups')
   
   # mm vs rp
-  data1 = subset(game_data, mean_matching == TRUE)
-  median_table[[i]][1,1] = sum(data1$ll_nash)
-  median_table[[i]][1,2] = sum(data1$ll_center)
-  median_table[[i]][1,3] = sum(data1$ll_mm)
-  median_table[[i]][1,4] = sum(data1$ll_mle)
-  median_table[[i]][1,5] = length(data1$session_round_id)
+  data1 = subset(game_data, match == 'mm')
+  median_table[[i]][1,1] = sum(data1$LL_NE)
+  median_table[[i]][1,2] = sum(data1$LL_Center)
+  median_table[[i]][1,3] = sum(data1$LL_MM)
+  median_table[[i]][1,4] = length(data1$group_id)
   
-  data2 = subset(game_data, mean_matching == FALSE)
-  median_table[[i]][2,1] = sum(data2$ll_nash)
-  median_table[[i]][2,2] = sum(data2$ll_center)
-  median_table[[i]][2,3] = sum(data2$ll_mm)
-  median_table[[i]][2,4] = sum(data2$ll_mle)
-  median_table[[i]][2,5] = length(data2$session_round_id)
+  data2 = subset(game_data, match == 'rp')
+  median_table[[i]][2,1] = sum(data2$LL_NE)
+  median_table[[i]][2,2] = sum(data2$LL_Center)
+  median_table[[i]][2,3] = sum(data2$LL_MM)
+  median_table[[i]][2,4] = length(data2$group_id)
   
   # mixed vs pure
-  data1 = subset(game_data, pure_strategy == FALSE)
-  median_table[[i]][3,1] = sum(data1$ll_nash)
-  median_table[[i]][3,2] = sum(data1$ll_center)
-  median_table[[i]][3,3] = sum(data1$ll_mm)
-  median_table[[i]][3,4] = sum(data1$ll_mle)
-  median_table[[i]][3,5] = length(data1$session_round_id)
+  data1 = subset(game_data, actionsets == 'M')
+  median_table[[i]][3,1] = sum(data1$LL_NE)
+  median_table[[i]][3,2] = sum(data1$LL_Center)
+  median_table[[i]][3,3] = sum(data1$LL_MM)
+  median_table[[i]][3,4] = length(data1$group_id)
   
-  data2 = subset(game_data, pure_strategy == TRUE)
-  median_table[[i]][4,1] = sum(data2$ll_nash)
-  median_table[[i]][4,2] = sum(data2$ll_center)
-  median_table[[i]][4,3] = sum(data2$ll_mm)
-  median_table[[i]][4,4] = sum(data2$ll_mle)
-  median_table[[i]][4,5] = length(data2$session_round_id)
+  data2 = subset(game_data, actionsets == 'P')
+  median_table[[i]][4,1] = sum(data2$LL_NE)
+  median_table[[i]][4,2] = sum(data2$LL_Center)
+  median_table[[i]][4,3] = sum(data2$LL_MM)
+  median_table[[i]][4,4] = length(data2$group_id)
   
   # continuous vs discrete
-  data1 = subset(game_data, num_subperiods == 0)
-  median_table[[i]][5,1] = sum(data1$ll_nash)
-  median_table[[i]][5,2] = sum(data1$ll_center)
-  median_table[[i]][5,3] = sum(data1$ll_mm)
-  median_table[[i]][5,4] = sum(data1$ll_mle)
-  median_table[[i]][5,5] = length(data1$session_round_id)
+  data1 = subset(game_data, time == 'C')
+  median_table[[i]][5,1] = sum(data1$LL_NE)
+  median_table[[i]][5,2] = sum(data1$LL_Center)
+  median_table[[i]][5,3] = sum(data1$LL_MM)
+  median_table[[i]][5,4] = length(data1$group_id)
   
-  data2 = subset(game_data, num_subperiods != 0)
-  median_table[[i]][6,1] = sum(data2$ll_nash)
-  median_table[[i]][6,2] = sum(data2$ll_center)
-  median_table[[i]][6,3] = sum(data2$ll_mm)
-  median_table[[i]][6,4] = sum(data2$ll_mle)
-  median_table[[i]][6,5] = length(data2$session_round_id)
+  data2 = subset(game_data, time == 'D')
+  median_table[[i]][6,1] = sum(data2$LL_NE)
+  median_table[[i]][6,2] = sum(data2$LL_Center)
+  median_table[[i]][6,3] = sum(data2$LL_MM)
+  median_table[[i]][6,4] = length(data2$group_id)
 }
 
 xtable(head(median_table[[1]]),digits=3,caption="Distance to predictions.")
 xtable(head(median_table[[2]]),digits=3,caption="Distance to predictions.")
+
+rm(data1, data2, game_data, last_data, median_table, round_data, mean_data)
 
 
 ##########Table (not used): Median data of time average by treatments##########
