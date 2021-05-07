@@ -31,7 +31,7 @@ treatmenttype = unique(full_data$treatmentfull)
 write.dta(full_data, "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta")
 
 
-##########Data preparation for cyclical behavior##########
+##########Data preparation for cyclical behavior and Table: Cycles by treatments##########
 ## add cycle type variables and related dummies
 full_data = full_data %>% mutate(cyctype = 'initial')
 
@@ -146,6 +146,80 @@ for (i in 1:length(uniqueID)){
 mean_data = arrange(mean_data, group_id)
 mean_data = filter(mean_data, game!='IDDS')
 write.dta(mean_data, "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_summary_cycle.dta")
+
+rm(last_data, round_data)
+
+## Table: Compare cycles between treatments
+# load package
+library(MASS)
+
+# create list
+median_table = list()
+
+# loop over game
+for (i in 1:2){
+  game_data = subset(mean_data, game == gametype[i])
+  
+  median_table[[i]] = matrix(0, nrow = 6, ncol = 6)
+  rownames(median_table[[i]]) = c('mm', 'rp', 'Mixed', 'Pure', 'Continuous', 'Discrete')
+  colnames(median_table[[i]]) = c('CW', 'Ccw', 'DD', 'CD', 'Stay', 'Num of Instances')
+  
+  # mm vs rp
+  data1 = subset(game_data, match == 'mm')
+  median_table[[i]][1,1] = mean(data1$cw)
+  median_table[[i]][1,2] = mean(data1$ccw)
+  median_table[[i]][1,3] = mean(data1$diagonal)
+  median_table[[i]][1,4] = mean(data1$cdiagonal)
+  median_table[[i]][1,5] = mean(data1$stay)
+  median_table[[i]][1,6] = length(data1$group_id)
+  
+  data2 = subset(game_data, match == 'rp')
+  median_table[[i]][2,1] = mean(data2$cw)
+  median_table[[i]][2,2] = mean(data2$ccw)
+  median_table[[i]][2,3] = mean(data2$diagonal)
+  median_table[[i]][2,4] = mean(data2$cdiagonal)
+  median_table[[i]][2,5] = mean(data2$stay)
+  median_table[[i]][2,6] = length(data2$group_id)
+  
+  # mixed vs pure
+  data1 = subset(game_data, actionsets == 'M')
+  median_table[[i]][3,1] = mean(data1$cw)
+  median_table[[i]][3,2] = mean(data1$ccw)
+  median_table[[i]][3,3] = mean(data1$diagonal)
+  median_table[[i]][3,4] = mean(data1$cdiagonal)
+  median_table[[i]][3,5] = mean(data1$stay)
+  median_table[[i]][3,6] = length(data1$group_id)
+  
+  data2 = subset(game_data, actionsets == 'P')
+  median_table[[i]][4,1] = mean(data2$cw)
+  median_table[[i]][4,2] = mean(data2$ccw)
+  median_table[[i]][4,3] = mean(data2$diagonal)
+  median_table[[i]][4,4] = mean(data2$cdiagonal)
+  median_table[[i]][4,5] = mean(data2$stay)
+  median_table[[i]][4,6] = length(data2$group_id)
+  
+  # continuous vs discrete
+  data1 = subset(game_data, time == 'C')
+  median_table[[i]][5,1] = mean(data1$cw)
+  median_table[[i]][5,2] = mean(data1$ccw)
+  median_table[[i]][5,3] = mean(data1$diagonal)
+  median_table[[i]][5,4] = mean(data1$cdiagonal)
+  median_table[[i]][5,5] = mean(data1$stay)
+  median_table[[i]][5,6] = length(data1$group_id)
+  
+  data2 = subset(game_data, time == 'D')
+  median_table[[i]][6,1] = mean(data2$cw)
+  median_table[[i]][6,2] = mean(data2$ccw)
+  median_table[[i]][6,3] = mean(data2$diagonal)
+  median_table[[i]][6,4] = mean(data2$cdiagonal)
+  median_table[[i]][6,5] = mean(data2$stay)
+  median_table[[i]][6,6] = length(data2$group_id)
+}
+
+xtable(head(median_table[[1]]),digits=3,caption="Average fraction of time playing each cycles by treatments.")
+xtable(head(median_table[[2]]),digits=3,caption="Average fraction of time playing each cycles by treatments..")
+
+rm(game_data, data1, data2, median_table)
 
 
 ##########Descriptive figure: QRE precision function heatmap##########
@@ -417,7 +491,7 @@ for (i in 1:length(gametype)){
 rm(game_data, mean_data, pic, qre_data, qre_precision, rec1, rec2, round_data)
 
 
-##########Table: Mean data of time average by treatments##########
+##########Data preparation for summary data and Table: Mean data of time average by treatments##########
 ## build summary data
 last_data = full_data
 # keep the last 30 seconds
@@ -540,7 +614,7 @@ for (i in 1:length(gametype)){
   median_table[[i]] = matrix(0, nrow = 6, ncol = 6)
   rownames(median_table[[i]]) = c('mm', 'rp', 'Mixed', 'Pure', 'Continuous', 'Discrete')
   colnames(median_table[[i]]) = c('Mean Distance to NE', ' ','Mean Distance to Center', 
-                                  ' ', 'Mean Distance to MM', 'Num of Groups')
+                                  ' ', 'Mean Distance to MM', 'Num of Instances')
   
   # mm vs rp
   data1 = subset(game_data, match == 'mm')
@@ -626,7 +700,7 @@ rm(game_data, last_data, round_data)
 rm(data1, data2, median_table, test)
 
 
-## Generate Table 4 (full version of Table 3)
+## Generate Appendix Table (full version of Table 3)
 # create list
 median_table = list()
 
@@ -1984,3 +2058,5 @@ print(MMrow, vp = vplayout(2:4,4))
 
 dev.off()
 
+
+##########(TBC)Table: Transition Prob Matrix##########
