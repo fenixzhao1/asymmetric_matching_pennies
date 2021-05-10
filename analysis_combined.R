@@ -353,8 +353,6 @@ for (i in 1:length(treatmenttype)){
   mean_data$treatments[i] = as.character(round_data$treatmentfull[1])
 }
 
-mean_data = arrange(mean_data, treatments)
-
 # Generate scatter plot
 # loop over games
 for (i in 1:length(gametype)){
@@ -1015,6 +1013,171 @@ xtable(head(median_table[[2]]),digits=3,caption="Distance to predictions.")
 xtable(head(median_table[[3]]),digits=3,caption="Distance to predictions.")
 
 rm(game_data, last_data, round_data, mean_data, data1, data2, median_table)
+
+
+##########Data preparation for beta estimation and Figure: Correlation between dispersion and beta estimation##########
+## build summary data
+last_data = full_data
+
+# create empty dataset
+#length = rep(NA, length(treatmenttype))
+length = rep(NA, length(uniqueID))
+mean_data = data.frame(treatments = length, session_id = length, group_id = length,
+                       p1_average = length, p2_average = length, sd_p1 = length, sd_p2 = length,
+                       p1NEmix = length, p2NEmix = length, p1MMmix = length, p2MMmix = length,
+                       time = length, actionsets = length, match = length, game = length)
+
+# loop over treatments
+#for (i in 1:length(treatmenttype)){
+#  round_data = subset(last_data, treatmentfull == treatmenttype[i])
+for (i in 1:length(uniqueID)){
+  round_data = subset(last_data, group_id == uniqueID[i])
+  
+  # fill in the mean_data row i
+  mean_data$session_id[i] = as.character(round_data$session_code[1])
+  mean_data$group_id[i] = as.character(round_data$group_id[1])
+  mean_data$p1_average[i] = mean(round_data$p1_strategy)
+  mean_data$p2_average[i] = mean(round_data$p2_strategy)
+  mean_data$sd_p1[i] = sd(round_data$p1_strategy)
+  mean_data$sd_p2[i] = sd(round_data$p2_strategy)
+  mean_data$p1NEmix[i] = round_data$p1NEmix[1]
+  mean_data$p2NEmix[i] = round_data$p2NEmix[1]
+  mean_data$p1MMmix[i] = round_data$p1MMmix[1]
+  mean_data$p2MMmix[i] = round_data$p2MMmix[1]
+  mean_data$time[i] = as.character(round_data$time[1])
+  mean_data$actionsets[i] = as.character(round_data$actionsets[1])
+  mean_data$match[i] = as.character(round_data$match[1])
+  mean_data$game[i] = as.character(round_data$game[1])
+  mean_data$treatments[i] = as.character(round_data$treatmentfull[1])
+}
+
+# add necessary variables
+mean_data = mean_data %>% mutate(Deviation_NE = sqrt((p1_average - p1NEmix)^2 + (p2_average - p2NEmix)^2))
+mean_data = mean_data %>% mutate(Deviation_MM = sqrt((p1_average - p1MMmix)^2 + (p2_average - p2MMmix)^2))
+mean_data = mean_data %>% mutate(Deviation_Mid = sqrt((p1_average - 0.5)^2 + (p2_average - 0.5)^2))
+mean_data = mean_data %>% mutate(sd_mean = (sd_p1 + sd_p2) / 2)
+mean_data = mean_data %>% mutate(sd_square = sqrt(sd_p1^2 + sd_p2^2))
+mean_data = mean_data %>% mutate(sd_harmonic = (sd_p1 * sd_p2) / (sd_p1 + sd_p2))
+mean_data = mean_data %>% mutate(sd_geometric = sqrt(sd_p1 * sd_p2))
+mean_data = mean_data %>% mutate(treatment_nogame = paste(actionsets, time, match, sep = '_'))
+
+# updated estimated beta from stata estimation
+mean_data = mean_data %>% mutate(beta_row = NA,
+                                 beta_col = NA)
+for (i in 1:length(treatmenttype)){
+  if (mean_data$treatments[i] == 'AMPa_M_C_mm'){
+    mean_data$beta_row[i] = 0.296
+    mean_data$beta_col[i] = 0.106}
+  if (mean_data$treatments[i] == 'AMPa_M_C_rp'){
+    mean_data$beta_row[i] = 0.087
+    mean_data$beta_col[i] = 0.090}
+  if (mean_data$treatments[i] == 'AMPa_M_D_mm'){
+    mean_data$beta_row[i] = 0.787
+    mean_data$beta_col[i] = 0.948}
+  if (mean_data$treatments[i] == 'AMPa_M_D_rp'){
+    mean_data$beta_row[i] = 0.890
+    mean_data$beta_col[i] = 0.439}
+  if (mean_data$treatments[i] == 'AMPa_P_C_mm'){
+    mean_data$beta_row[i] = 0.498
+    mean_data$beta_col[i] = 0.238}
+  if (mean_data$treatments[i] == 'AMPa_P_C_rp'){
+    mean_data$beta_row[i] = 0.660
+    mean_data$beta_col[i] = 0.505}
+  if (mean_data$treatments[i] == 'AMPa_P_D_mm'){
+    mean_data$beta_row[i] = 1.845
+    mean_data$beta_col[i] = 0.704}
+  if (mean_data$treatments[i] == 'AMPa_P_D_rp'){
+    mean_data$beta_row[i] = 1.023
+    mean_data$beta_col[i] = 0.593}
+  
+  if (mean_data$treatments[i] == 'AMPb_M_C_mm'){
+    mean_data$beta_row[i] = 0.362
+    mean_data$beta_col[i] = 0.215}
+  if (mean_data$treatments[i] == 'AMPb_M_C_rp'){
+    mean_data$beta_row[i] = 0.117
+    mean_data$beta_col[i] = 0.260}
+  if (mean_data$treatments[i] == 'AMPb_M_D_mm'){
+    mean_data$beta_row[i] = 0.945
+    mean_data$beta_col[i] = 1.320}
+  if (mean_data$treatments[i] == 'AMPb_M_D_rp'){
+    mean_data$beta_row[i] = 1.152
+    mean_data$beta_col[i] = 1.068}
+  if (mean_data$treatments[i] == 'AMPb_P_C_mm'){
+    mean_data$beta_row[i] = 0.798
+    mean_data$beta_col[i] = 0.594}
+  if (mean_data$treatments[i] == 'AMPb_P_C_rp'){
+    mean_data$beta_row[i] = 0.589
+    mean_data$beta_col[i] = 0.812}
+  if (mean_data$treatments[i] == 'AMPb_P_D_mm'){
+    mean_data$beta_row[i] = 1.580
+    mean_data$beta_col[i] = 1.711}
+  if (mean_data$treatments[i] == 'AMPb_P_D_rp'){
+    mean_data$beta_row[i] = 1.011
+    mean_data$beta_col[i] = 1.073}
+}
+
+# drop IDDS and caluclate mean beta
+mean_data = mean_data %>% filter(game != 'IDDS') %>% mutate(beta = (beta_row+beta_col)/2)
+
+write.dta(mean_data, "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_summary_beta.dta")
+
+# ## draw figure between distance to NE and beta
+# # set title
+# title = 'correlation_DistancetoNE_beta'
+# file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/", title, sep = "")
+# file = paste(file, ".png", sep = "")
+# png(file, width = 600, height = 450)
+# 
+# # check the correlation
+# cor.test(mean_data$Deviation_NE, mean_data$beta)
+# correlation = paste('cor=', as.character(round(cor(mean_data$Deviation_NE, mean_data$beta), digit = 3)),
+#                     '***', sep = '')
+# 
+# # scatter plot
+# pic = ggplot() +
+#   geom_point(data = mean_data, aes(x = Deviation_NE, y = beta
+#                                    , color = treatment_nogame, shape = game), size=3) +
+#   ggtitle(paste(title, correlation, sep = ' ')) +
+#   scale_x_continuous(name='distance between time average and NE') +
+#   scale_y_continuous(name='beta') +
+#   theme_bw() +
+#   theme(plot.title = element_text(hjust = 0.5, size = 25),
+#         axis.title.x = element_text(size = 20), axis.title.y = element_text(size = 20),
+#         legend.text = element_text(size = 15))
+# 
+# print(pic)
+# dev.off()
+# 
+# 
+# ## draw figure between dispersion and beta
+# # set title
+# title = 'correlation_GeometricDispersion_beta'
+# file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/", title, sep = "")
+# file = paste(file, ".png", sep = "")
+# png(file, width = 600, height = 450)
+# 
+# # check the correlation
+# cor.test(mean_data$sd_geometric, mean_data$beta)
+# correlation = paste('cor=', as.character(round(cor(mean_data$sd_geometric, mean_data$beta), digit = 3)),
+#                     '***', sep = '')
+# 
+# # scatter plot
+# pic = ggplot() +
+#   geom_point(data = mean_data, aes(x = sd_geometric, y = beta
+#                                    , color = treatment_nogame, shape = game), size=3) +
+#   ggtitle(paste(title, correlation, sep = ' ')) +
+#   scale_x_continuous(name='distance between time average and NE') +
+#   scale_y_continuous(name='beta') +
+#   theme_bw() +
+#   theme(plot.title = element_text(hjust = 0.5, size = 25),
+#         axis.title.x = element_text(size = 20), axis.title.y = element_text(size = 20),
+#         legend.text = element_text(size = 15))
+# 
+# print(pic)
+# dev.off()
+# 
+# # rm temp datasets
+# rm(last_data, mean_data, pic, round_data)
 
 
 ##########Table: Mean data of time average and compare NE MM Center with loglikelihood##########

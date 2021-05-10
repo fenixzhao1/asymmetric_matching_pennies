@@ -73,7 +73,7 @@ save "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/producti
 
 
 
-**********T-test: data summary table with time averages (Table 3)**********
+**********T-test: data summary table with time averages (Table 4)**********
 use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_summary.dta", clear
 
 gen diff_ne_mid = Deviation_NE - Deviation_Mid
@@ -138,7 +138,7 @@ reg diff_mid_mm if game=="IDDS" & time=="D", cluster(session_id)
 
 
 
-**********T-test: signed distance to NE, MM, and Center for row and column players (Table 4)**********
+**********T-test: signed distance to NE, MM, and Center for row and column players (Table 3)**********
 use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_summary.dta", clear
 
 * generate signed distance dependent variables
@@ -433,6 +433,78 @@ outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
 
+**********T-test: data summary table with time averages (Table 6)**********
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_summary_cycle.dta", clear
+
+gen diff_cw_ccw = cw - ccw
+gen diff_cw_dd = cw - diagonal
+gen diff_cw_cd = cw - cdiagonal
+gen diff_cw_stay = cw - stay
+
+* Panel A: AMPa games
+reg diff_cw_ccw if game=="AMPa" & match=="mm", cluster(session_id)
+reg diff_cw_dd if game=="AMPa" & match=="mm", cluster(session_id)
+reg diff_cw_cd if game=="AMPa" & match=="mm", cluster(session_id)
+reg diff_cw_stay if game=="AMPa" & match=="mm", cluster(session_id)
+
+reg diff_cw_ccw if game=="AMPa" & match=="rp", cluster(session_id)
+reg diff_cw_dd if game=="AMPa" & match=="rp", cluster(session_id)
+reg diff_cw_cd if game=="AMPa" & match=="rp", cluster(session_id)
+reg diff_cw_stay if game=="AMPa" & match=="rp", cluster(session_id)
+
+reg diff_cw_ccw if game=="AMPa" & actionsets=="M", cluster(session_id)
+reg diff_cw_dd if game=="AMPa" & actionsets=="M", cluster(session_id)
+reg diff_cw_cd if game=="AMPa" & actionsets=="M", cluster(session_id)
+reg diff_cw_stay if game=="AMPa" & actionsets=="M", cluster(session_id)
+
+reg diff_cw_ccw if game=="AMPa" & actionsets=="P", cluster(session_id)
+reg diff_cw_dd if game=="AMPa" & actionsets=="P", cluster(session_id)
+reg diff_cw_cd if game=="AMPa" & actionsets=="P", cluster(session_id)
+reg diff_cw_stay if game=="AMPa" & actionsets=="P", cluster(session_id)
+
+reg diff_cw_ccw if game=="AMPa" & time=="C", cluster(session_id)
+reg diff_cw_dd if game=="AMPa" & time=="C", cluster(session_id)
+reg diff_cw_cd if game=="AMPa" & time=="C", cluster(session_id)
+reg diff_cw_stay if game=="AMPa" & time=="C", cluster(session_id)
+
+reg diff_cw_ccw if game=="AMPa" & time=="D", cluster(session_id)
+reg diff_cw_dd if game=="AMPa" & time=="D", cluster(session_id)
+reg diff_cw_cd if game=="AMPa" & time=="D", cluster(session_id)
+reg diff_cw_stay if game=="AMPa" & time=="D", cluster(session_id)
+
+* Panel B: AMPb games
+reg diff_cw_ccw if game=="AMPb" & match=="mm", cluster(session_id)
+reg diff_cw_dd if game=="AMPb" & match=="mm", cluster(session_id)
+reg diff_cw_cd if game=="AMPb" & match=="mm", cluster(session_id)
+reg diff_cw_stay if game=="AMPb" & match=="mm", cluster(session_id)
+
+reg diff_cw_ccw if game=="AMPb" & match=="rp", cluster(session_id)
+reg diff_cw_dd if game=="AMPb" & match=="rp", cluster(session_id)
+reg diff_cw_cd if game=="AMPb" & match=="rp", cluster(session_id)
+reg diff_cw_stay if game=="AMPb" & match=="rp", cluster(session_id)
+
+reg diff_cw_ccw if game=="AMPb" & actionsets=="M", cluster(session_id)
+reg diff_cw_dd if game=="AMPb" & actionsets=="M", cluster(session_id)
+reg diff_cw_cd if game=="AMPb" & actionsets=="M", cluster(session_id)
+reg diff_cw_stay if game=="AMPb" & actionsets=="M", cluster(session_id)
+
+reg diff_cw_ccw if game=="AMPb" & actionsets=="P", cluster(session_id)
+reg diff_cw_dd if game=="AMPb" & actionsets=="P", cluster(session_id)
+reg diff_cw_cd if game=="AMPb" & actionsets=="P", cluster(session_id)
+reg diff_cw_stay if game=="AMPb" & actionsets=="P", cluster(session_id)
+
+reg diff_cw_ccw if game=="AMPb" & time=="C", cluster(session_id)
+reg diff_cw_dd if game=="AMPb" & time=="C", cluster(session_id)
+reg diff_cw_cd if game=="AMPb" & time=="C", cluster(session_id)
+reg diff_cw_stay if game=="AMPb" & time=="C", cluster(session_id)
+
+reg diff_cw_ccw if game=="AMPb" & time=="D", cluster(session_id)
+reg diff_cw_dd if game=="AMPb" & time=="D", cluster(session_id)
+reg diff_cw_cd if game=="AMPb" & time=="D", cluster(session_id)
+reg diff_cw_stay if game=="AMPb" & time=="D", cluster(session_id)
+
+
+
 **********Directional learning**********
 ** Bootstrap method without IDDS
 * Row player learning
@@ -497,7 +569,94 @@ outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
 
-**********Directional learning (combine C and D treatments)**********
+**********T-test and Regression: Directional learning estimating beta by treatments**********
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta", clear
+drop if game_idds == 1
+xtset session_round_pair_id tick
+
+** row player estimation
+* AMPa M C mm
+xtreg p1_diff p1_regret_sign if game==1 & pure_strategy==0 & num_subperiods==0 & mean_matching==1, fe
+* AMPa M C rp
+xtreg p1_diff p1_regret_sign if game==1 & pure_strategy==0 & num_subperiods==0 & mean_matching==0, fe
+* AMPa M D mm
+xtreg p1_diff p1_regret_sign if game==1 & pure_strategy==0 & num_subperiods!=0 & mean_matching==1, fe
+* AMPa M D rp
+xtreg p1_diff p1_regret_sign if game==1 & pure_strategy==0 & num_subperiods!=0 & mean_matching==0, fe
+* AMPa P C mm
+xtreg p1_diff p1_regret_sign if game==1 & pure_strategy==1 & num_subperiods==0 & mean_matching==1, fe
+* AMPa P C rp
+xtreg p1_diff p1_regret_sign if game==1 & pure_strategy==1 & num_subperiods==0 & mean_matching==0, fe
+* AMPa P D mm
+xtreg p1_diff p1_regret_sign if game==1 & pure_strategy==1 & num_subperiods!=0 & mean_matching==1, fe
+* AMPa P D rp
+xtreg p1_diff p1_regret_sign if game==1 & pure_strategy==1 & num_subperiods!=0 & mean_matching==0, fe
+
+* AMPb M C mm
+xtreg p1_diff p1_regret_sign if game==2 & pure_strategy==0 & num_subperiods==0 & mean_matching==1, fe
+* AMPb M C rp
+xtreg p1_diff p1_regret_sign if game==2 & pure_strategy==0 & num_subperiods==0 & mean_matching==0, fe
+* AMPb M D mm
+xtreg p1_diff p1_regret_sign if game==2 & pure_strategy==0 & num_subperiods!=0 & mean_matching==1, fe
+* AMPb M D rp
+xtreg p1_diff p1_regret_sign if game==2 & pure_strategy==0 & num_subperiods!=0 & mean_matching==0, fe
+* AMPb P C mm
+xtreg p1_diff p1_regret_sign if game==2 & pure_strategy==1 & num_subperiods==0 & mean_matching==1, fe
+* AMPb P C rp
+xtreg p1_diff p1_regret_sign if game==2 & pure_strategy==1 & num_subperiods==0 & mean_matching==0, fe
+* AMPb P D mm
+xtreg p1_diff p1_regret_sign if game==2 & pure_strategy==1 & num_subperiods!=0 & mean_matching==1, fe
+* AMPb P D rp
+xtreg p1_diff p1_regret_sign if game==2 & pure_strategy==1 & num_subperiods!=0 & mean_matching==0, fe
+
+
+** column player estimation
+* AMPa M C mm
+xtreg p2_diff p2_regret_sign if game==1 & pure_strategy==0 & num_subperiods==0 & mean_matching==1, fe
+* AMPa M C rp
+xtreg p2_diff p2_regret_sign if game==1 & pure_strategy==0 & num_subperiods==0 & mean_matching==0, fe
+* AMPa M D mm
+xtreg p2_diff p2_regret_sign if game==1 & pure_strategy==0 & num_subperiods!=0 & mean_matching==1, fe
+* AMPa M D rp
+xtreg p2_diff p2_regret_sign if game==1 & pure_strategy==0 & num_subperiods!=0 & mean_matching==0, fe
+* AMPa P C mm
+xtreg p2_diff p2_regret_sign if game==1 & pure_strategy==1 & num_subperiods==0 & mean_matching==1, fe
+* AMPa P C rp
+xtreg p2_diff p2_regret_sign if game==1 & pure_strategy==1 & num_subperiods==0 & mean_matching==0, fe
+* AMPa P D mm
+xtreg p2_diff p2_regret_sign if game==1 & pure_strategy==1 & num_subperiods!=0 & mean_matching==1, fe
+* AMPa P D rp
+xtreg p2_diff p2_regret_sign if game==1 & pure_strategy==1 & num_subperiods!=0 & mean_matching==0, fe
+
+* AMPb M C mm
+xtreg p2_diff p2_regret_sign if game==2 & pure_strategy==0 & num_subperiods==0 & mean_matching==1, fe
+* AMPb M C rp
+xtreg p2_diff p2_regret_sign if game==2 & pure_strategy==0 & num_subperiods==0 & mean_matching==0, fe
+* AMPb M D mm
+xtreg p2_diff p2_regret_sign if game==2 & pure_strategy==0 & num_subperiods!=0 & mean_matching==1, fe
+* AMPb M D rp
+xtreg p2_diff p2_regret_sign if game==2 & pure_strategy==0 & num_subperiods!=0 & mean_matching==0, fe
+* AMPb P C mm
+xtreg p2_diff p2_regret_sign if game==2 & pure_strategy==1 & num_subperiods==0 & mean_matching==1, fe
+* AMPb P C rp
+xtreg p2_diff p2_regret_sign if game==2 & pure_strategy==1 & num_subperiods==0 & mean_matching==0, fe
+* AMPb P D mm
+xtreg p2_diff p2_regret_sign if game==2 & pure_strategy==1 & num_subperiods!=0 & mean_matching==1, fe
+* AMPb P D rp
+xtreg p2_diff p2_regret_sign if game==2 & pure_strategy==1 & num_subperiods!=0 & mean_matching==0, fe
+
+
+** regression
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_summary_beta.dta", clear
+reg Deviation_NE beta, cluster(session_id)
+outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
+
+reg sd_geometric beta, cluster(session_id)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+
+
+**********Directional learning (combine C and D treatments and rescale regret terms)**********
 use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta", clear
 drop if game_idds == 1
 
@@ -563,53 +722,55 @@ use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/productio
 
 gen p1_direction_pure = p1_direction * dummy_pure
 gen p1_direction_mm = p1_direction * dummy_mm
-gen p1_direction_8002 = p1_direction * dummy_8002
+gen p1_direction_AMPa = p1_direction * dummy_AMPa
 gen p1_direction_IDDS = p1_direction * dummy_IDDS
 gen p1_direction_pure_mm = p1_direction * dummy_pure * dummy_mm
-gen p1_direction_pure_8002 = p1_direction * dummy_pure * dummy_8002
+gen p1_direction_pure_AMPa = p1_direction * dummy_pure * dummy_AMPa
 gen p1_direction_pure_IDDS = p1_direction * dummy_pure * dummy_IDDS
-gen p1_direction_mm_8002 = p1_direction * dummy_mm * dummy_8002
+gen p1_direction_mm_AMPa = p1_direction * dummy_mm * dummy_AMPa
 gen p1_direction_mm_IDDS = p1_direction * dummy_mm * dummy_IDDS
-gen p1_direction_pure_mm_8002 = p1_direction * dummy_pure * dummy_mm * dummy_8002
+gen p1_direction_pure_mm_AMPa = p1_direction * dummy_pure * dummy_mm * dummy_AMPa
 gen p1_direction_pure_mm_IDDS = p1_direction * dummy_pure * dummy_mm * dummy_IDDS
 
 gen p2_direction_pure = p2_direction * dummy_pure
 gen p2_direction_mm = p2_direction * dummy_mm
-gen p2_direction_8002 = p2_direction * dummy_8002
+gen p2_direction_AMPa = p2_direction * dummy_AMPa
 gen p2_direction_IDDS = p2_direction * dummy_IDDS
 gen p2_direction_pure_mm = p2_direction * dummy_pure * dummy_mm
-gen p2_direction_pure_8002 = p2_direction * dummy_pure * dummy_8002
+gen p2_direction_pure_AMPa = p2_direction * dummy_pure * dummy_AMPa
 gen p2_direction_pure_IDDS = p2_direction * dummy_pure * dummy_IDDS
-gen p2_direction_mm_8002 = p2_direction * dummy_mm * dummy_8002
+gen p2_direction_mm_AMPa = p2_direction * dummy_mm * dummy_AMPa
 gen p2_direction_mm_IDDS = p2_direction * dummy_mm * dummy_IDDS
-gen p2_direction_pure_mm_8002 = p2_direction * dummy_pure * dummy_mm * dummy_8002
+gen p2_direction_pure_mm_AMPa = p2_direction * dummy_pure * dummy_mm * dummy_AMPa
 gen p2_direction_pure_mm_IDDS = p2_direction * dummy_pure * dummy_mm * dummy_IDDS
 
 * Row player learning
+drop if game_idds == 1
+
 * regression in continuous time
 xtset session_round_pair_id tick
-xtreg p1_diff p1_direction p1_direction_pure p1_direction_mm p1_direction_8002 p1_direction_IDDS ///
-      p1_direction_pure_mm p1_direction_pure_8002 p1_direction_pure_IDDS p1_direction_mm_8002 p1_direction_mm_IDDS /// 
-      p1_direction_pure_mm_8002 p1_direction_pure_mm_IDDS if num_subperiods==0, fe vce(robust)
+xtreg p1_diff p1_direction p1_direction_pure p1_direction_mm p1_direction_AMPa ///
+      p1_direction_pure_mm p1_direction_pure_AMPa p1_direction_mm_AMPa /// 
+      if num_subperiods==0, fe vce(cluster session_code)
 outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
 
 * regression in discrete time
-xtreg p1_diff p1_direction p1_direction_pure p1_direction_mm p1_direction_8002 p1_direction_IDDS ///
-      p1_direction_pure_mm p1_direction_pure_8002 p1_direction_pure_IDDS p1_direction_mm_8002 p1_direction_mm_IDDS /// 
-      p1_direction_pure_mm_8002 p1_direction_pure_mm_IDDS if num_subperiods!=0, fe vce(robust)
+xtreg p1_diff p1_direction p1_direction_pure p1_direction_mm p1_direction_AMPa ///
+      p1_direction_pure_mm p1_direction_pure_AMPa p1_direction_mm_AMPa ///
+      if num_subperiods!=0, fe vce(cluster session_code)
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 * Column player learning
 * regression in continuous time
-xtreg p2_diff p2_direction p2_direction_pure p2_direction_mm p2_direction_8002 p2_direction_IDDS ///
-      p2_direction_pure_mm p2_direction_pure_8002 p2_direction_pure_IDDS p2_direction_mm_8002 p2_direction_mm_IDDS /// 
-      p2_direction_pure_mm_8002 p2_direction_pure_mm_IDDS if num_subperiods==0, fe vce(robust)
+xtreg p2_diff p2_direction p2_direction_pure p2_direction_mm p2_direction_AMPa ///
+      p2_direction_pure_mm p2_direction_pure_AMPa p2_direction_mm_AMPa /// 
+      if num_subperiods==0, fe vce(cluster session_code)
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 * regression in discrete time
-xtreg p2_diff p2_direction p2_direction_pure p2_direction_mm p2_direction_8002 p2_direction_IDDS ///
-      p2_direction_pure_mm p2_direction_pure_8002 p2_direction_pure_IDDS p2_direction_mm_8002 p2_direction_mm_IDDS /// 
-      p2_direction_pure_mm_8002 p2_direction_pure_mm_IDDS if num_subperiods!=0, fe vce(robust)
+xtreg p2_diff p2_direction p2_direction_pure p2_direction_mm p2_direction_AMPa ///
+      p2_direction_pure_mm p2_direction_pure_AMPa p2_direction_mm_AMPa /// 
+      if num_subperiods!=0, fe vce(cluster session_code)
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
@@ -620,53 +781,55 @@ use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/productio
 
 gen p1_sign_pure = p1_sign * dummy_pure
 gen p1_sign_mm = p1_sign * dummy_mm
-gen p1_sign_8002 = p1_sign * dummy_8002
+gen p1_sign_AMPa = p1_sign * dummy_AMPa
 gen p1_sign_IDDS = p1_sign * dummy_IDDS
 gen p1_sign_pure_mm = p1_sign * dummy_pure * dummy_mm
-gen p1_sign_pure_8002 = p1_sign * dummy_pure * dummy_8002
+gen p1_sign_pure_AMPa = p1_sign * dummy_pure * dummy_AMPa
 gen p1_sign_pure_IDDS = p1_sign * dummy_pure * dummy_IDDS
-gen p1_sign_mm_8002 = p1_sign * dummy_mm * dummy_8002
+gen p1_sign_mm_AMPa = p1_sign * dummy_mm * dummy_AMPa
 gen p1_sign_mm_IDDS = p1_sign * dummy_mm * dummy_IDDS
-gen p1_sign_pure_mm_8002 = p1_sign * dummy_pure * dummy_mm * dummy_8002
+gen p1_sign_pure_mm_AMPa = p1_sign * dummy_pure * dummy_mm * dummy_AMPa
 gen p1_sign_pure_mm_IDDS = p1_sign * dummy_pure * dummy_mm * dummy_IDDS
 
 gen p2_sign_pure = p2_sign * dummy_pure
 gen p2_sign_mm = p2_sign * dummy_mm
-gen p2_sign_8002 = p2_sign * dummy_8002
+gen p2_sign_AMPa = p2_sign * dummy_AMPa
 gen p2_sign_IDDS = p2_sign * dummy_IDDS
 gen p2_sign_pure_mm = p2_sign * dummy_pure * dummy_mm
-gen p2_sign_pure_8002 = p2_sign * dummy_pure * dummy_8002
+gen p2_sign_pure_AMPa = p2_sign * dummy_pure * dummy_AMPa
 gen p2_sign_pure_IDDS = p2_sign * dummy_pure * dummy_IDDS
-gen p2_sign_mm_8002 = p2_sign * dummy_mm * dummy_8002
+gen p2_sign_mm_AMPa = p2_sign * dummy_mm * dummy_AMPa
 gen p2_sign_mm_IDDS = p2_sign * dummy_mm * dummy_IDDS
-gen p2_sign_pure_mm_8002 = p2_sign * dummy_pure * dummy_mm * dummy_8002
+gen p2_sign_pure_mm_AMPa = p2_sign * dummy_pure * dummy_mm * dummy_AMPa
 gen p2_sign_pure_mm_IDDS = p2_sign * dummy_pure * dummy_mm * dummy_IDDS
 
 * Row player learning
+drop if game_idds == 1
+
 * regression in continuous time
 xtset session_round_pair_id tick
-xtreg p1_diff p1_sign p1_sign_pure p1_sign_mm p1_sign_8002 p1_sign_IDDS ///
-      p1_sign_pure_mm p1_sign_pure_8002 p1_sign_pure_IDDS p1_sign_mm_8002 p1_sign_mm_IDDS /// 
-      p1_sign_pure_mm_8002 p1_sign_pure_mm_IDDS if num_subperiods==0, fe vce(robust)
+xtreg p1_diff p1_sign p1_sign_pure p1_sign_mm p1_sign_AMPa ///
+      p1_sign_pure_mm p1_sign_pure_AMPa p1_sign_mm_AMPa /// 
+      if num_subperiods==0, fe vce(cluster session_code)
 outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
 
 * regression in discrete time
-xtreg p1_diff p1_sign p1_sign_pure p1_sign_mm p1_sign_8002 p1_sign_IDDS ///
-      p1_sign_pure_mm p1_sign_pure_8002 p1_sign_pure_IDDS p1_sign_mm_8002 p1_sign_mm_IDDS /// 
-      p1_sign_pure_mm_8002 p1_sign_pure_mm_IDDS if num_subperiods!=0, fe vce(robust)
+xtreg p1_diff p1_sign p1_sign_pure p1_sign_mm p1_sign_AMPa ///
+      p1_sign_pure_mm p1_sign_pure_AMPa p1_sign_mm_AMPa ///
+      if num_subperiods!=0, fe vce(cluster session_code)
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 * Column player learning
 * regression in continuous time
-xtreg p2_diff p2_sign p2_sign_pure p2_sign_mm p2_sign_8002 p2_sign_IDDS ///
-      p2_sign_pure_mm p2_sign_pure_8002 p2_sign_pure_IDDS p2_sign_mm_8002 p2_sign_mm_IDDS /// 
-      p2_sign_pure_mm_8002 p2_sign_pure_mm_IDDS if num_subperiods==0, fe vce(robust)
+xtreg p2_diff p2_sign p2_sign_pure p2_sign_mm p2_sign_AMPa ///
+      p2_sign_pure_mm p2_sign_pure_AMPa p2_sign_mm_AMPa /// 
+      if num_subperiods==0, fe vce(cluster session_code)
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 * regression in discrete time
-xtreg p2_diff p2_sign p2_sign_pure p2_sign_mm p2_sign_8002 p2_sign_IDDS ///
-      p2_sign_pure_mm p2_sign_pure_8002 p2_sign_pure_IDDS p2_sign_mm_8002 p2_sign_mm_IDDS /// 
-      p2_sign_pure_mm_8002 p2_sign_pure_mm_IDDS if num_subperiods!=0, fe vce(robust)
+xtreg p2_diff p2_sign p2_sign_pure p2_sign_mm p2_sign_AMPa ///
+      p2_sign_pure_mm p2_sign_pure_AMPa p2_sign_mm_AMPa /// 
+      if num_subperiods!=0, fe vce(cluster session_code)
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
@@ -740,7 +903,7 @@ outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 
 
-**********Directional learning with discrete (small, medium, large) regret**********
+**********Directional learning with discrete (small, medium, large) regret (not used)**********
 use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta", clear
 xtset session_round_pair_id tick
 
@@ -808,10 +971,4 @@ xtreg p2_diff col_regret_sign col_regret_sign_pure col_regret_sign_mm col_regret
       col_regret_sign_pure_mm col_regret_sign_pure_8002 col_regret_sign_pure_IDDS col_regret_sign_mm_8002 col_regret_sign_mm_IDDS /// 
       col_regret_sign_pure_mm_8002 col_regret_sign_pure_mm_IDDS if num_subperiods!=0, fe vce(robust)
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
-
-
-
-
-
-
 
