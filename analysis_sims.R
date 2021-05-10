@@ -592,14 +592,14 @@ print(c(mean(p1pop_average), mean(p2pop_average)))
 
 ##########Figure: Limited cycles simulation##########
 # define figure title
-title = paste('limit cycle new')
+title = paste('limit_cycle_low_beta')
 file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/sims/", title, sep = "")
 file = paste(file, ".png", sep = "")
 png(file, width = 800, height = 400)
 
 # set simulation parameters
 iteration = 1500
-row_speed = 0.10
+row_speed = 0.1
 column_speed = 0.24
 pure_indicator = 0
 step = 1
@@ -617,13 +617,13 @@ for (j in 1:sims){
   tripwire_data = subset(tripwire_data, (row_strategy - 0.5)*(row_next - 0.5) <= 0)
   
   if (j == 1){
-    plot(tripwire_data$to_ne, type = 'l', col = 'blue',
-         xlab = 'number of cycles', ylab = 'Deviation to NE', ylim = c(0,0.4),
-         main = 'Limit Cycle with Poincare Section (a=0.5, b>0.2)',
+    plot(tripwire_data$to_ne+0.001, type = 'l', col = 'blue',
+         xlab = 'number of cycles', ylab = 'Deviation to NE', ylim = c(0,0.7),
+         main = 'Limit Cycle with Poincare Section (a=0.5, b>0.2) and beta=0.1/0.24',
          cex.main = 1.5, cex.lab = 1.5)
   }
   else{
-    lines(tripwire_data$to_ne, type = 'l', col = 'blue', ylim = c(0,0.4))
+    lines(tripwire_data$to_ne+0.001, type = 'l', col = 'blue', ylim = c(0,0.7))
   }
   
   ## start inside the circle
@@ -636,10 +636,12 @@ for (j in 1:sims){
   tripwire_data = subset(simulation_data, column_strategy > 0.2)
   tripwire_data = subset(tripwire_data, (row_strategy - 0.5)*(row_next - 0.5) <= 0)
   
-  lines(tripwire_data$to_ne, type = 'l', col = 'red', ylim = c(0,0.4))
+  lines(tripwire_data$to_ne, type = 'l', col = 'red', ylim = c(0,0.7))
 }
 
 dev.off()
+
+rm(simulation_data, tripwire_data)
 
 
 ##########Table: Transition probability matrix for pure###########
@@ -741,7 +743,7 @@ tpm = tpm / sims
 
 ##########Figure: Trajectory of time average over beta##########
 # set up parameters
-iteration = 3000
+iteration = 1500
 pure_indicator = 0
 step = 1
 # set storage dataset
@@ -753,26 +755,26 @@ for (i in 1:length(df$beta)){
   column_speed = df$beta[i]
   
   simulation_function = data.frame(learning_simulation(iteration, row_speed, column_speed, pure_indicator, step))
-  df$p1_average[i] = round(mean(simulation_function$row_next[1500:3000]), digits = 3)
-  df$p2_average[i] = round(mean(simulation_function$column_next[1500:3000]), digits = 3)
+  df$p1_average[i] = round(mean(simulation_function$row_next[1000:1500]), digits = 3)
+  df$p2_average[i] = round(mean(simulation_function$column_next[1000:1500]), digits = 3)
 }
 
 # draw figure
-title = paste('time average over beta')
+title = paste('time_average_over_beta')
 file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/sims/", title, sep = "")
 file = paste(file, ".png", sep = "")
 png(file, width = 800, height = 400)
 
 pic = ggplot() +
-  #geom_line(data = df, mapping = aes(x = beta, y = p1_average), colour = 'blue') +
-  #geom_line(data = df, mapping = aes(x = beta, y = p2_average), colour = 'red') +
+  geom_line(data = df, mapping = aes(x = beta, y = p1_average), colour = 'blue', size = 1) +
+  geom_line(data = df, mapping = aes(x = beta, y = p2_average), colour = 'red', size = 1) +
   geom_smooth(data = df, mapping = aes(x = beta, y = p1_average), stat = 'smooth',
               method = loess, formula = 'y ~ x', colour = 'blue') +
   geom_smooth(data = df, mapping = aes(x = beta, y = p2_average), stat = 'smooth',
               method = loess, formula = 'y ~ x', colour = 'red') +
   geom_hline(aes(yintercept=0.5), colour = 'black', linetype = 'dotted') +
   geom_hline(aes(yintercept=0.2), colour = 'black', linetype = 'dotted') +
-  ggtitle(title) +
+  ggtitle('time average over beta') +
   scale_x_continuous(name='beta', limits = c(0,4), breaks = seq(0,4,0.5)) +
   scale_y_continuous(name='time average', limits = c(0,1), breaks = seq(0,1,0.5)) +
   scale_colour_manual(values=c('blue','red', 'black'), 
@@ -801,12 +803,12 @@ for (i in 1:length(df$beta)){
   row_speed = df$beta[i]
   column_speed = df$beta[i]
   simulation_function = data.frame(learning_simulation(iteration, row_speed, column_speed, pure_indicator, step))
-  df$to_ne[i] = simulation_function$to_ne[iteration]
+  df$to_ne[i] = mean(simulation_function$to_ne[iteration-500:iteration])
 }
 
 # draw figure
 library(ggplot2)
-title = paste('distance to NE over beta')
+title = paste('distance_to_NE_over_beta')
 file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/sims/", title, sep = "")
 file = paste(file, ".png", sep = "")
 png(file, width = 800, height = 400)
@@ -814,7 +816,8 @@ png(file, width = 800, height = 400)
 pic = ggplot() +
   geom_smooth(data = df, mapping = aes(x = beta, y = to_ne), stat = 'smooth',
               method = loess, formula = 'y ~ x', se = FALSE) +
-  ggtitle(title) +
+  geom_line(data = df, mapping = aes(x = beta, y = to_ne), colour = 'blue', size = 1) +
+  ggtitle('distance to NE over beta') +
   scale_x_continuous(name='beta', limits = c(0,4), breaks = seq(0,4,0.5)) +
   scale_y_continuous(name='distance to NE') +
   theme_bw() + 
@@ -826,3 +829,60 @@ print(pic)
 dev.off()
 
 rm(df, pic, simulation_function)
+
+
+##########Figure: Showcase of a single cycle given beta##########
+# basic parameters and datasets
+iteration = 1500
+pure_indicator = 0
+step = 1
+
+# figure 1 small beta
+library(dplyr)
+row_speed = 0.1
+column_speed = 0.24
+simulation_data1 = data.frame(learning_simulation(iteration, row_speed, column_speed, pure_indicator, step))
+simulation_data1 = simulation_data1 %>% mutate(
+  tripwire = ifelse(column_strategy>0.2 & (row_strategy-0.5)*(row_next-0.5)<= 0, 1, 0))
+simulation_data1 = filter(simulation_data1, iteration>=1400)
+
+# figure 2 large beta
+row_speed = 1
+column_speed = 1
+simulation_data2 = data.frame(learning_simulation(iteration, row_speed, column_speed, pure_indicator, step))
+simulation_data2 = simulation_data2 %>% mutate(
+  tripwire = ifelse(column_strategy>0.2 & (row_strategy-0.5)*(row_next-0.5)<= 0, 1, 0))
+simulation_data2 = filter(simulation_data2, iteration>=1300)
+
+# figure 2 extra large beta
+row_speed = 4
+column_speed = 4
+simulation_data3 = data.frame(learning_simulation(iteration, row_speed, column_speed, pure_indicator, step))
+simulation_data3 = simulation_data3 %>% mutate(
+  tripwire = ifelse(column_strategy>0.2 & (row_strategy-0.5)*(row_next-0.5)<= 0, 1, 0))
+simulation_data3 = filter(simulation_data3, iteration>=1300)
+
+# set up the figure
+# draw figure
+library(ggplot2)
+title = paste('sample_circle_over_beta')
+file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/sims/", title, sep = "")
+file = paste(file, ".png", sep = "")
+png(file, width = 600, height = 600)
+
+pic = ggplot() +
+  geom_point(data = simulation_data1, mapping = aes(x = column_strategy, y = row_strategy), colour = 'red', size = 2) +
+  geom_point(data = simulation_data2, mapping = aes(x = column_strategy, y = row_strategy), colour = 'blue', size = 2) +
+  geom_point(data = simulation_data3, mapping = aes(x = column_strategy, y = row_strategy), colour = 'green', size = 2) +
+  geom_hline(aes(yintercept=0.5), colour = 'black', linetype = 'dotted') +
+  geom_vline(aes(xintercept=0.2), colour = 'black', linetype = 'dotted') +
+  ggtitle('sample circles beta=0.1/0.24 and beta=1') +
+  scale_x_continuous(name='column strategy', limits = c(0,1)) +
+  scale_y_continuous(name='row strategy', limits = c(0,1)) +
+  theme_bw() + 
+  theme(plot.title = element_text(hjust = 0.5, size = 20), legend.text = element_text(size = 15),
+        axis.title.x = element_text(size = 15), axis.title.y = element_text(size = 15),
+        axis.text.x = element_text(size = 15), axis.text.y = element_text(size = 15))
+
+print(pic)
+dev.off()
