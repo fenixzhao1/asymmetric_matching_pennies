@@ -446,7 +446,7 @@ learning_simulation_mm = function(iteration, row_speed, column_speed, pure_indic
 
 ##########Figure: Fitted regret-based model simulation RP dynamics##########
 # run the simulation
-title = paste('Simulation3D AMPa rp P')
+title = paste('Simulation2D AMPa rp M 1')
 file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/sims/", title, sep = "")
 file = paste(file, ".png", sep = "")
 png(file, width = 500, height = 500)
@@ -454,63 +454,63 @@ png(file, width = 500, height = 500)
 # store time average
 p1_average = c()
 p2_average = c()
-sims = 50
-iteration = 1000
-row_speed = 0.19
-column_speed = 0.15
-pure_indicator = 1
+sims = 20
+iteration = 500
+row_speed = 0.1
+column_speed = 0.24
+pure_indicator = 0
 step = 1
 
 for (j in 1:sims){
   simulation_data = data.frame(learning_simulation(iteration, row_speed, column_speed, pure_indicator, step))
   par(new=TRUE)
 
-  # draw 3D plots
-  if (j == 1){
-    # 3D plot by NE
-    plot3D::lines3D(simulation_data$row_next, simulation_data$column_next, iteration-simulation_data$iteration, col='blue',
-                    xlab='row strategy', xlim=c(0:1),
-                    ylab='column strategy', ylim=c(0:1),
-                    zlab='time left',
-                    main = 'simulation random pairwise',
-                    theta=20, phi=30, r=2, d=1, bty='g')
-    plot3D::lines3D(rep(0.5, iteration), rep(0.2, iteration), iteration-simulation_data$iteration, col='black', add=TRUE)
-    plot3D::lines3D(rep(0.5, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='green', add=TRUE)
-    plot3D::lines3D(rep(0.2, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='red', add=TRUE)
-
-  }
-  else{
-    # 3D plot by NE
-    plot3D::lines3D(simulation_data$row_next, simulation_data$column_next, iteration-simulation_data$iteration, col='blue',
-                    xlab='row strategy', xlim=c(0:1),
-                    ylab='column strategy', ylim=c(0:1),
-                    zlab='time left',
-                    theta=20, phi=30, r=2, d=1, bty='g', add=TRUE)
-    plot3D::lines3D(rep(0.5, iteration), rep(0.2, iteration), iteration-simulation_data$iteration, col='black', add=TRUE)
-    plot3D::lines3D(rep(0.5, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='green', add=TRUE)
-    plot3D::lines3D(rep(0.2, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='red', add=TRUE)
-  }
-  
-  # # try 2D plots
+  # # draw 3D plots
   # if (j == 1){
-  #   plot(simulation_data$row_next, simulation_data$column_next,
-  #        xlab='row strategy', xlim=c(0:1),
-  #        ylab='column strategy', ylim=c(0:1),
-  #        main = 'simulation random pairwise', type = 'l', cex = 1.5)
+  #   # 3D plot by NE
+  #   plot3D::lines3D(simulation_data$row_next, simulation_data$column_next, iteration-simulation_data$iteration, col='blue',
+  #                   xlab='row strategy', xlim=c(0:1),
+  #                   ylab='column strategy', ylim=c(0:1),
+  #                   zlab='time left',
+  #                   main = 'simulation random pairwise',
+  #                   theta=20, phi=30, r=2, d=1, bty='g')
+  #   plot3D::lines3D(rep(0.5, iteration), rep(0.2, iteration), iteration-simulation_data$iteration, col='black', add=TRUE)
+  #   plot3D::lines3D(rep(0.5, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='green', add=TRUE)
+  #   plot3D::lines3D(rep(0.2, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='red', add=TRUE)
+  # 
   # }
   # else{
-  #   plot(simulation_data$row_next, simulation_data$column_next,
-  #        xlab='row strategy', xlim=c(0:1),
-  #        ylab='column strategy', ylim=c(0:1), type = 'l', cex = 1.5)
+  #   # 3D plot by NE
+  #   plot3D::lines3D(simulation_data$row_next, simulation_data$column_next, iteration-simulation_data$iteration, col='blue',
+  #                   xlab='row strategy', xlim=c(0:1),
+  #                   ylab='column strategy', ylim=c(0:1),
+  #                   zlab='time left',
+  #                   theta=20, phi=30, r=2, d=1, bty='g', add=TRUE)
+  #   plot3D::lines3D(rep(0.5, iteration), rep(0.2, iteration), iteration-simulation_data$iteration, col='black', add=TRUE)
+  #   plot3D::lines3D(rep(0.5, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='green', add=TRUE)
+  #   plot3D::lines3D(rep(0.2, iteration), rep(0.5, iteration), iteration-simulation_data$iteration, col='red', add=TRUE)
   # }
   
+  # try 2D plots
+  if (j == 1){
+    plot(simulation_data$row_next, simulation_data$column_next,
+         xlab='row strategy', xlim=c(0:1),
+         ylab='column strategy', ylim=c(0:1),
+         main = 'simulation random pairwise', type = 'l', cex = 1.5)
+  }
+  else{
+    plot(simulation_data$row_next, simulation_data$column_next,
+         xlab='row strategy', xlim=c(0:1),
+         ylab='column strategy', ylim=c(0:1), type = 'l', cex = 1.5)
+  }
+
   # add time average
   p1_average = cbind(p1_average, simulation_data$p1_time_average[iteration])
   p2_average = cbind(p2_average, simulation_data$p2_time_average[iteration])
 }
 
-# text(0.5,0.2,'NE',cex=1,pos=3,col="blue")
-# text(0.2,0.5,'MM',cex=1,pos=3,col="red")
+text(0.5,0.2,'NE',cex=1,pos=3,col="blue")
+text(0.2,0.5,'MM',cex=1,pos=3,col="red")
 
 dev.off()
 
@@ -746,17 +746,26 @@ tpm = tpm / sims
 iteration = 1500
 pure_indicator = 0
 step = 1
+sims = 20
+
 # set storage dataset
-df = data.frame(beta = seq(0.1, 4, 0.01), p1_average = rep(NA, length(seq(0.1, 4, 0.01)))
-                , p2_average = rep(NA, length(seq(0.1, 4, 0.01))))
+df = data.frame(beta = seq(0.1, 4, 0.2), p1_average = rep(NA, length(seq(0.1, 4, 0.2)))
+                , p2_average = rep(NA, length(seq(0.1, 4, 0.2))))
 
 for (i in 1:length(df$beta)){
   row_speed = df$beta[i]
   column_speed = df$beta[i]
+  p1_avg = 0
+  p2_avg = 0
   
-  simulation_function = data.frame(learning_simulation(iteration, row_speed, column_speed, pure_indicator, step))
-  df$p1_average[i] = round(mean(simulation_function$row_next[1000:1500]), digits = 3)
-  df$p2_average[i] = round(mean(simulation_function$column_next[1000:1500]), digits = 3)
+  for (j in 1:sims){
+    simulation_function = data.frame(learning_simulation(iteration, row_speed, column_speed, pure_indicator, step))
+    p1_avg = p1_avg + round(mean(simulation_function$row_next[1000:1500]), digits = 3)
+    p2_avg = p2_avg + round(mean(simulation_function$column_next[1000:1500]), digits = 3)
+  }
+  
+  df$p1_average[i] = p1_avg / sims
+  df$p2_average[i] = p2_avg / sims
 }
 
 # draw figure
@@ -766,19 +775,19 @@ file = paste(file, ".png", sep = "")
 png(file, width = 800, height = 400)
 
 pic = ggplot() +
-  geom_line(data = df, mapping = aes(x = beta, y = p1_average), colour = 'blue', size = 1) +
-  geom_line(data = df, mapping = aes(x = beta, y = p2_average), colour = 'red', size = 1) +
-  geom_smooth(data = df, mapping = aes(x = beta, y = p1_average), stat = 'smooth',
-              method = loess, formula = 'y ~ x', colour = 'blue') +
-  geom_smooth(data = df, mapping = aes(x = beta, y = p2_average), stat = 'smooth',
-              method = loess, formula = 'y ~ x', colour = 'red') +
+  geom_line(data = df, mapping = aes(x = beta, y = p1_average, colour = 'blue'), size = 1) +
+  geom_line(data = df, mapping = aes(x = beta, y = p2_average, colour = 'red'), size = 1) +
+  # geom_smooth(data = df, mapping = aes(x = beta, y = p1_average), stat = 'smooth',
+  #             method = loess, formula = 'y ~ x', colour = 'blue') +
+  # geom_smooth(data = df, mapping = aes(x = beta, y = p2_average), stat = 'smooth',
+  #             method = loess, formula = 'y ~ x', colour = 'red') +
   geom_hline(aes(yintercept=0.5), colour = 'black', linetype = 'dotted') +
   geom_hline(aes(yintercept=0.2), colour = 'black', linetype = 'dotted') +
   ggtitle('time average over beta') +
   scale_x_continuous(name='beta', limits = c(0,4), breaks = seq(0,4,0.5)) +
   scale_y_continuous(name='time average', limits = c(0,1), breaks = seq(0,1,0.5)) +
-  scale_colour_manual(values=c('blue','red', 'black'), 
-                      labels=c('row time average','column time average', 'NE')) +
+  scale_colour_manual(values=c('blue','red'), 
+                      labels=c('row average','column average')) +
   theme_bw() + 
   theme(plot.title = element_text(hjust = 0.5, size = 20), legend.text = element_text(size = 15),
         axis.title.x = element_text(size = 15), axis.title.y = element_text(size = 15),
@@ -795,15 +804,22 @@ rm(simulation_function, pic, df)
 iteration = 1500
 pure_indicator = 0
 step = 1
+sims = 20
 
 # set storage dataset
-df = data.frame(beta = seq(0.1, 4, 0.01), to_ne = rep(NA, length(seq(0.1, 4, 0.01))))
+df = data.frame(beta = seq(0.1, 4, 0.2), to_ne = rep(NA, length(seq(0.1, 4, 0.2))))
 
 for (i in 1:length(df$beta)){
   row_speed = df$beta[i]
   column_speed = df$beta[i]
-  simulation_function = data.frame(learning_simulation(iteration, row_speed, column_speed, pure_indicator, step))
-  df$to_ne[i] = mean(simulation_function$to_ne[iteration-500:iteration])
+  to_ne = 0
+  
+  for (j in 1:sims){
+    simulation_function = data.frame(learning_simulation(iteration, row_speed, column_speed, pure_indicator, step))
+    to_ne = to_ne + mean(simulation_function$to_ne[1000:1500])
+  }
+  
+  df$to_ne[i] = to_ne / sims
 }
 
 # draw figure
@@ -814,13 +830,14 @@ file = paste(file, ".png", sep = "")
 png(file, width = 800, height = 400)
 
 pic = ggplot() +
-  geom_smooth(data = df, mapping = aes(x = beta, y = to_ne), stat = 'smooth',
-              method = loess, formula = 'y ~ x', se = FALSE) +
-  geom_line(data = df, mapping = aes(x = beta, y = to_ne), colour = 'blue', size = 1) +
+  # geom_smooth(data = df, mapping = aes(x = beta, y = to_ne), stat = 'smooth',
+  #             method = loess, formula = 'y ~ x', se = FALSE) +
+  geom_line(data = df, mapping = aes(x = beta, y = to_ne, colour = 'blue'), size = 1) +
   ggtitle('distance to NE over beta') +
   scale_x_continuous(name='beta', limits = c(0,4), breaks = seq(0,4,0.5)) +
   scale_y_continuous(name='distance to NE') +
   theme_bw() + 
+  scale_colour_manual(values=c('blue'), labels=c('distance')) +
   theme(plot.title = element_text(hjust = 0.5, size = 20), legend.text = element_text(size = 15),
         axis.title.x = element_text(size = 15), axis.title.y = element_text(size = 15),
         axis.text.x = element_text(size = 15), axis.text.y = element_text(size = 15))
@@ -868,15 +885,58 @@ library(ggplot2)
 title = paste('sample_circle_over_beta')
 file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/sims/", title, sep = "")
 file = paste(file, ".png", sep = "")
-png(file, width = 600, height = 600)
+png(file, width = 500, height = 400)
 
 pic = ggplot() +
-  geom_point(data = simulation_data1, mapping = aes(x = column_strategy, y = row_strategy), colour = 'red', size = 2) +
-  geom_point(data = simulation_data2, mapping = aes(x = column_strategy, y = row_strategy), colour = 'blue', size = 2) +
-  geom_point(data = simulation_data3, mapping = aes(x = column_strategy, y = row_strategy), colour = 'green', size = 2) +
+  geom_point(data = simulation_data1, mapping = aes(x = row_strategy, y = column_strategy, colour = 'red'), size = 3) +
+  geom_point(data = simulation_data2, mapping = aes(x = row_strategy, y = column_strategy, colour = 'blue'), size = 3) +
+  geom_point(data = simulation_data3, mapping = aes(x = row_strategy, y = column_strategy, colour = 'green'), size = 3) +
+  geom_hline(aes(yintercept=0.2), colour = 'black', linetype = 'dotted') +
+  geom_vline(aes(xintercept=0.5), colour = 'black', linetype = 'dotted') +
+  ggtitle('sample circles wrt beta') +
+  scale_x_continuous(name='row strategy', limits = c(0,1)) +
+  scale_y_continuous(name='column strategy', limits = c(0,1)) +
+  theme_bw() + 
+  scale_color_manual(values=c('blue','red','green'),
+                     labels=c('beta=1','beta=4','beta=0.1/0.24')) +
+  theme(plot.title = element_text(hjust = 0.5, size = 20), legend.text = element_text(size = 15),
+        axis.title.x = element_text(size = 15), axis.title.y = element_text(size = 15),
+        axis.text.x = element_text(size = 15), axis.text.y = element_text(size = 15))
+
+print(pic)
+dev.off()
+
+rm(pic, simulation_data1, simulation_data2, simulation_data3)
+
+
+##########Figure (not used): explain non-monotonicity trajectory of time average and radius##########
+# basic parameters and datasets
+iteration = 1500
+pure_indicator = 0
+step = 1
+
+# figure 1 small beta
+library(dplyr)
+row_speed = 2.6
+column_speed = 2.6
+simulation_data1 = data.frame(learning_simulation(iteration, row_speed, column_speed, pure_indicator, step))
+simulation_data1 = simulation_data1 %>% mutate(
+  tripwire = ifelse(column_strategy>0.2 & (row_strategy-0.5)*(row_next-0.5)<= 0, 1, 0))
+simulation_data1 = filter(simulation_data1, iteration>=1300)
+
+# set up the figure
+# draw figure
+library(ggplot2)
+title = paste('sample_circle_over_beta', 'beta', as.character(row_speed), sep = ' ')
+file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/sims/", title, sep = "")
+file = paste(file, ".png", sep = "")
+png(file, width = 500, height = 400)
+
+pic = ggplot() +
+  geom_point(data = simulation_data1, mapping = aes(x = column_strategy, y = row_strategy, colour = 'red'), size = 3) +
   geom_hline(aes(yintercept=0.5), colour = 'black', linetype = 'dotted') +
   geom_vline(aes(xintercept=0.2), colour = 'black', linetype = 'dotted') +
-  ggtitle('sample circles beta=0.1/0.24 and beta=1') +
+  ggtitle(paste('beta', as.character(row_speed), sep = ' ')) +
   scale_x_continuous(name='column strategy', limits = c(0,1)) +
   scale_y_continuous(name='row strategy', limits = c(0,1)) +
   theme_bw() + 
@@ -886,3 +946,29 @@ pic = ggplot() +
 
 print(pic)
 dev.off()
+
+rm(pic, simulation_data1)
+
+
+##########Data preparation for regression table wrt beta##########
+# set up parameters
+iteration = 1500
+pure_indicator = 0
+step = 1
+sims = 20
+
+# set storage dataset
+df = data.frame(beta = seq(0.1, 4, 0.1), Dispersion_Geometric = rep(NA, length(seq(0.1, 4, 0.1)))
+                , Deviation_NE = rep(NA, length(seq(0.1, 4, 0.1))))
+
+for (i in 1:length(df$beta)){
+  row_speed = df$beta[i]
+  column_speed = df$beta[i]
+  simulation = data.frame(learning_simulation(iteration, row_speed, column_speed, pure_indicator, step))
+  
+  df$Deviation_NE[i] = mean(simulation$to_ne)
+  df$Dispersion_Geometric[i] = sqrt(sd(simulation$row_strategy)*sd(simulation$column_strategy))
+}
+
+# export dataset to stata
+write.dta(df, "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_summary_sim.dta")

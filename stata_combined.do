@@ -646,12 +646,21 @@ xtreg p2_diff p2_regret_sign if game==2 & pure_strategy==1 & num_subperiods!=0 &
 xtreg p2_diff p2_regret_sign if game==2 & pure_strategy==1 & num_subperiods!=0 & mean_matching==0, fe
 
 
-** regression
+** regression for empirical data
 use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_summary_beta.dta", clear
-reg Deviation_NE beta, cluster(session_id)
-outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
 
-reg sd_geometric beta, cluster(session_id)
+reg Deviation_NE beta, cluster (session_id)
+outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
+reg sd_geometric beta, cluster (session_id)
+outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
+
+
+** regression for sim data
+use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_summary_sim.dta", clear
+
+reg Deviation_NE beta
+outreg2 using D:\Dropbox\stataresult, tex nonote se replace nolabel bdec(2)
+reg Dispersion_Geometric beta
 outreg2 using D:\Dropbox\stataresult, tex nonote se append nolabel bdec(2)
 
 

@@ -285,28 +285,23 @@ rgb.palette <- colorRampPalette(colours, space = "Lab")
 x.scale <- list(at=seq(from = 0, to = 100, length.out = 6))
 y.scale <- list(at=seq(from = 0, to = 100, length.out = 6))
 
-# draw the graph
-heat = levelplot(z, col.regions=rgb.palette(1000), 
+heat = levelplot(z, col.regions=rgb.palette(1000),
                  scales=list(x=x.scale, y=y.scale),
                  main="Predictions on row player payoff heatmap",
-                 xlab="column action", 
-                 ylab="row action" ,
+                 xlab="row action",
+                 ylab="column action" ,
                  cuts = 1000)
-
-NE <- layer(panel.points(y=100*0.5, x= 100*0.2, col = "black", cex=1.5))
-NEText <- layer(panel.text(y=100*0.5, x= 100*0.2, labels= "NE", pos=4, cex=1.5))
-
-MM <- layer(panel.points(y=100*0.2, x= 100*0.5, col = "black", cex=1.5))
-MMText <- layer(panel.text(y=100*0.2, x= 100*0.5, labels= "MM", pos=4, cex=1.5))
-
+NE <- layer(panel.points(y=100*0.2, x= 100*0.5, col = "black", cex=1.5))
+NEText <- layer(panel.text(y=100*0.2, x= 100*0.5, labels= "NE", pos=4, cex=1.5))
+MM <- layer(panel.points(y=100*0.5, x= 100*0.2, col = "black", cex=1.5))
+MMText <- layer(panel.text(y=100*0.5, x= 100*0.2, labels= "MM", pos=4, cex=1.5))
 Mid <- layer(panel.points(y=100*0.5, x= 100*0.5, col = "black", cex=1.5))
 MidText <- layer(panel.text(y=100*0.5, x= 100*0.5, labels= "Center", pos=4, cex=1.5))
-
-curve <- layer(panel.xyplot(100*qre_precision$p2_row, 100*qre_precision$p1_row, type = 'l', col = 'black'))
+curve <- layer(panel.xyplot(100*qre_precision$p1_row, 100*qre_precision$p2_row, type = 'l', col = 'black', pch = 20))
 
 fullplot = heat + NE + NEText + MM + MMText + Mid + MidText + curve
 
-title = 'AMPaheatmap+ptpreds_redscale'
+title = 'AMPaheatmap+ptpreds_heat'
 file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/gambit/", title, sep = "")
 file = paste(file, ".png", sep = "")
 png(file)
@@ -377,25 +372,25 @@ for (i in 1:length(gametype)){
     
     # scatter plot
     pic = ggplot() +
-      geom_rect(mapping = aes(xmin = 0.5, ymin = 0, xmax = 0.75, ymax = 0.33), 
+      geom_rect(mapping = aes(xmin = 0, ymin = 0.5, xmax = 0.33, ymax = 0.75), 
                 color = 'azure2', fill = 'azure2', alpha = 0.5, size = 1.5) +
-      geom_rect(mapping = aes(xmin = 0, ymin = 0.33, xmax = 0.5, ymax = 0.5), 
+      geom_rect(mapping = aes(xmin = 0.33, ymin = 0, xmax = 0.5, ymax = 0.5), 
                 color = 'azure2', fill = 'azure2', alpha = 0.5, size = 1.5) +
-      geom_point(data = qre_precision, aes(x = p2_row, y = p1_row)) +
-      geom_point(data = game_data, aes(x = p2_average, y = p1_average, color = treatments), size=3) +
-      geom_text(aes(x = game_data$p2NEmix[1], y = game_data$p1NEmix[1],
+      geom_point(data = qre_precision, aes(x = p1_row, y = p2_row)) +
+      geom_point(data = game_data, aes(x = p1_average, y = p2_average, color = treatments), size=3) +
+      geom_text(aes(x = game_data$p1NEmix[1], y = game_data$p2NEmix[1],
                     label = 'NE'), vjust = -0.2, hjust = -0.2) +
-      geom_text(aes(x = game_data$p2MMmix[1], y = game_data$p1MMmix[1],
+      geom_text(aes(x = game_data$p1MMmix[1], y = game_data$p2MMmix[1],
                     label = 'MM'), vjust = -0.2, hjust = -0.2) +
       geom_text(aes(x = 0.5, y = 0.5,
                     label = 'Center'), vjust = -0.1, hjust = -0.1) +
-      geom_point(data = game_data, aes(x = p2NEmix[1], y = p1NEmix[1]), size=3) +
-      geom_point(data = game_data, aes(x = p2MMmix[1], y = p1MMmix[1]), size=3) +
+      geom_point(data = game_data, aes(x = p1NEmix[1], y = p2NEmix[1]), size=3) +
+      geom_point(data = game_data, aes(x = p1MMmix[1], y = p2MMmix[1]), size=3) +
       geom_point(data = game_data, aes(x = 0.5, y = 0.5), size=3) +
       
       ggtitle(title) +
-      scale_x_continuous(name='column strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
-      scale_y_continuous(name='row strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+      scale_x_continuous(name='row strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+      scale_y_continuous(name='column strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
       theme_bw() +
       theme(plot.title = element_text(hjust = 0.5, size = 25),
             axis.title.x = element_text(size = 20), axis.title.y = element_text(size = 20),
@@ -423,22 +418,22 @@ for (i in 1:length(gametype)){
     
     # scatter plot
     pic = ggplot() +
-      geom_rect(mapping = aes(xmin = 0.2, ymin = 0.5, xmax = 0.5, ymax = 1), 
+      geom_rect(mapping = aes(xmin = 0.5, ymin = 0.2, xmax = 1, ymax = 0.5), 
                 color = 'azure2', fill = 'azure2', alpha = 0.5, size = 1.5) +
-      geom_point(data = qre_precision, aes(x = p2_row, y = p1_row)) +
-      geom_point(data = game_data, aes(x = p2_average, y = p1_average, color = treatments), size=3) +
-      geom_text(aes(x = game_data$p2NEmix[1], y = game_data$p1NEmix[1],
+      geom_point(data = qre_precision, aes(x = p1_row, y = p2_row)) +
+      geom_point(data = game_data, aes(x = p1_average, y = p2_average, color = treatments), size=3) +
+      geom_text(aes(x = game_data$p1NEmix[1], y = game_data$p2NEmix[1],
                     label = 'NE'), vjust = -0.2, hjust = -0.2) +
-      geom_text(aes(x = game_data$p2MMmix[1], y = game_data$p1MMmix[1],
+      geom_text(aes(x = game_data$p1MMmix[1], y = game_data$p2MMmix[1],
                     label = 'MM'), vjust = -0.2, hjust = -0.2) +
       geom_text(aes(x = 0.5, y = 0.5,
                     label = 'Center'), vjust = -0.1, hjust = -0.1) +
-      geom_point(data = game_data, aes(x = p2NEmix[1], y = p1NEmix[1]), size=3) +
-      geom_point(data = game_data, aes(x = p2MMmix[1], y = p1MMmix[1]), size=3) +
+      geom_point(data = game_data, aes(x = p1NEmix[1], y = p2NEmix[1]), size=3) +
+      geom_point(data = game_data, aes(x = p1MMmix[1], y = p2MMmix[1]), size=3) +
       geom_point(data = game_data, aes(x = 0.5, y = 0.5), size=3) +
       ggtitle(title) +
-      scale_x_continuous(name='column strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
-      scale_y_continuous(name='row strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+      scale_x_continuous(name='row strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+      scale_y_continuous(name='column strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
       theme_bw() +
       theme(plot.title = element_text(hjust = 0.5, size = 25),
             axis.title.x = element_text(size = 20), axis.title.y = element_text(size = 20),
@@ -461,20 +456,20 @@ for (i in 1:length(gametype)){
     
     # scatter plot
     pic = ggplot() +
-      geom_rect(mapping = aes(xmin = 0.5, ymin = 0, xmax = 1, ymax = 0.5), 
+      geom_rect(mapping = aes(xmin = 0, ymin = 0.5, xmax = 0.5, ymax = 1), 
                 color = 'azure2', fill = 'azure2', alpha = 0.5, size = 1.5) +
-      geom_point(aes(x = seq(from=0.5, to=game_data$p2NEmix[1], by=0.01), 
-                     y = seq(from=0.5, to=game_data$p1NEmix[1], by=-0.01))) +
-      geom_point(data = game_data, aes(x = p2_average, y = p1_average, color = treatments), size=3) +
-      geom_text(aes(x = game_data$p2NEmix[1], y = game_data$p1NEmix[1],
+      geom_point(aes(x = seq(from=0.5, to=game_data$p1NEmix[1], by=-0.01), 
+                     y = seq(from=0.5, to=game_data$p2NEmix[1], by=0.01))) +
+      geom_point(data = game_data, aes(x = p1_average, y = p2_average, color = treatments), size=3) +
+      geom_text(aes(x = game_data$p1NEmix[1], y = game_data$p2NEmix[1],
                     label = 'NE'), vjust = -0.2, hjust = -0.2) +
       geom_text(aes(x = 0.5, y = 0.5,
                     label = 'Center'), vjust = -0.1, hjust = -0.1) +
-      geom_point(data = game_data, aes(x = p2NEmix[1], y = p1NEmix[1]), size=3) +
+      geom_point(data = game_data, aes(x = p1NEmix[1], y = p2NEmix[1]), size=3) +
       geom_point(data = game_data, aes(x = 0.5, y = 0.5), size=3) +
       ggtitle(title) +
-      scale_x_continuous(name='column strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
-      scale_y_continuous(name='row strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+      scale_x_continuous(name='row strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+      scale_y_continuous(name='column strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
       theme_bw() +
       theme(plot.title = element_text(hjust = 0.5, size = 25),
             axis.title.x = element_text(size = 20), axis.title.y = element_text(size = 20),
@@ -1020,18 +1015,18 @@ rm(game_data, last_data, round_data, mean_data, data1, data2, median_table)
 last_data = full_data
 
 # create empty dataset
-#length = rep(NA, length(treatmenttype))
-length = rep(NA, length(uniqueID))
+length = rep(NA, length(treatmenttype))
+#length = rep(NA, length(uniqueID))
 mean_data = data.frame(treatments = length, session_id = length, group_id = length,
                        p1_average = length, p2_average = length, sd_p1 = length, sd_p2 = length,
                        p1NEmix = length, p2NEmix = length, p1MMmix = length, p2MMmix = length,
                        time = length, actionsets = length, match = length, game = length)
 
 # loop over treatments
-#for (i in 1:length(treatmenttype)){
-#  round_data = subset(last_data, treatmentfull == treatmenttype[i])
-for (i in 1:length(uniqueID)){
-  round_data = subset(last_data, group_id == uniqueID[i])
+for (i in 1:length(treatmenttype)){
+ round_data = subset(last_data, treatmentfull == treatmenttype[i])
+# for (i in 1:length(uniqueID)){
+#   round_data = subset(last_data, group_id == uniqueID[i])
   
   # fill in the mean_data row i
   mean_data$session_id[i] = as.character(round_data$session_code[1])
@@ -1064,6 +1059,7 @@ mean_data = mean_data %>% mutate(treatment_nogame = paste(actionsets, time, matc
 # updated estimated beta from stata estimation
 mean_data = mean_data %>% mutate(beta_row = NA,
                                  beta_col = NA)
+#for (i in 1:length(uniqueID)){
 for (i in 1:length(treatmenttype)){
   if (mean_data$treatments[i] == 'AMPa_M_C_mm'){
     mean_data$beta_row[i] = 0.296
@@ -1176,8 +1172,8 @@ write.dta(mean_data, "D:/Dropbox/Working Papers/When Are Mixed Equilibria Releva
 # print(pic)
 # dev.off()
 # 
-# # rm temp datasets
-# rm(last_data, mean_data, pic, round_data)
+# rm temp datasets
+rm(last_data, mean_data, pic, round_data)
 
 
 ##########Table: Mean data of time average and compare NE MM Center with loglikelihood##########
@@ -2222,4 +2218,92 @@ print(MMrow, vp = vplayout(2:4,4))
 dev.off()
 
 
-##########(TBC)Table: Transition Prob Matrix##########
+##########Table: Transition probability matrix##########
+# get rid of IDDS
+mp_data = filter(full_data, game != 'IDDS')
+mp_data = mp_data %>% arrange(session_code, subsession_id, id_in_subsession, silo_num, tick)
+
+# set up the columns for strategy profiles
+mp_data = mp_data %>% 
+  mutate(type = ifelse(p1_average>=p1NEmix&p2_average>=p2NEmix, '(A,a)',
+                       ifelse(p1_average<=p1NEmix&p2_average<=p2NEmix, '(B,b)',
+                              ifelse(p1_average<=p1NEmix&p2_average>=p2NEmix, '(B,a)', '(A,b)'))))
+
+# update type for next profile
+mp_data = mp_data %>% group_by(session_round_pair_id) %>%
+  mutate(type_next = lead(type, 1, default = 'Initial'))
+
+# set up the transition probability matrix
+transition_prob = list()
+
+# loop over treatments
+for (i in 1:length(treatmenttype)){
+  df = filter(mp_data, treatmentfull == treatmenttype[i])
+
+  # build transition probability matrix
+  # create transition matrix
+  transition = matrix(0, nrow = 4, ncol = 4)
+  rownames(transition) = c('(A,a) at t', '(B,a) at t', '(B,b) at t', '(A,b) at t')
+  colnames(transition) = c('(A,a) at t+1', '(B,a) at t+1', '(B,b) at t+1', '(A,b) at t+1')
+  
+  # skip idds treatments
+  if (length(df$tick) == 0){
+    transition_prob[[i]] = transition
+    next}
+  
+  # loop over observations
+  for (j in 1:length(df$tick)){
+    if (df$type[j] == '(A,a)'){
+      if (df$type_next[j] == '(A,a)'){transition[1,1] = transition[1,1] + 1}
+      else if (df$type_next[j] == '(B,a)'){transition[1,2] = transition[1,2] + 1}
+      else if (df$type_next[j] == '(B,b)'){transition[1,3] = transition[1,3] + 1}
+      else if (df$type_next[j] == '(A,b)'){transition[1,4] = transition[1,4] + 1}
+      else{next}
+    }
+    
+    else if (df$type[j] == '(B,a)'){
+      if (df$type_next[j] == '(A,a)'){transition[2,1] = transition[2,1] + 1}
+      else if (df$type_next[j] == '(B,a)'){transition[2,2] = transition[2,2] + 1}
+      else if (df$type_next[j] == '(B,b)'){transition[2,3] = transition[2,3] + 1}
+      else if (df$type_next[j] == '(A,b)'){transition[2,4] = transition[2,4] + 1}
+      else{next}
+    }
+    
+    else if (df$type[j] == '(B,b)'){
+      if (df$type_next[j] == '(A,a)'){transition[3,1] = transition[3,1] + 1}
+      else if (df$type_next[j] == '(B,a)'){transition[3,2] = transition[3,2] + 1}
+      else if (df$type_next[j] == '(B,b)'){transition[3,3] = transition[3,3] + 1}
+      else if (df$type_next[j] == '(A,b)'){transition[3,4] = transition[3,4] + 1}
+      else{next}
+    }
+    
+    else if (df$type[j] == '(A,b)'){
+      if (df$type_next[j] == '(A,a)'){transition[4,1] = transition[4,1] + 1}
+      else if (df$type_next[j] == '(B,a)'){transition[4,2] = transition[4,2] + 1}
+      else if (df$type_next[j] == '(B,b)'){transition[4,3] = transition[4,3] + 1}
+      else if (df$type_next[j] == '(A,b)'){transition[4,4] = transition[4,4] + 1}
+      else{next}
+    }
+    
+    else{next}
+  }
+  
+  # calculate transition probability
+  transition_prob[[i]] = transition
+  for (k in 1:4){
+    transition_prob[[i]][k,1] = round(transition[k,1] / sum(transition[k,1:4]), 3)
+    transition_prob[[i]][k,2] = round(transition[k,2] / sum(transition[k,1:4]), 3)
+    transition_prob[[i]][k,3] = round(transition[k,3] / sum(transition[k,1:4]), 3)
+    transition_prob[[i]][k,4] = round(transition[k,4] / sum(transition[k,1:4]), 3)
+    #transition_prob[[i]][k,5] = sum(transition[k,1:4])
+  }
+}
+
+# table outputs
+xtable(transition_prob[[1]], caption = as.character(treatmenttype[1]))
+
+# calculate eigenvectors
+x = round(eigen(transition_prob[[1]])$vec, digits = 3)
+y = round(eigen(transition_prob[[1]])$val, digits = 3)
+
+rm(mp_data, transition, transition_prob, df)
