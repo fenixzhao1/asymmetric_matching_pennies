@@ -2234,6 +2234,7 @@ mp_data = mp_data %>% group_by(session_round_pair_id) %>%
   mutate(type_next = lead(type, 1, default = 'Initial'))
 
 # set up the transition probability matrix
+transition = list()
 transition_prob = list()
 
 # loop over treatments
@@ -2249,6 +2250,7 @@ for (i in 1:length(treatmenttype)){
   # skip idds treatments
   if (length(df$tick) == 0){
     transition_prob[[i]] = transition
+    transition[[i]] = transition
     next}
   
   # loop over observations
@@ -2289,13 +2291,14 @@ for (i in 1:length(treatmenttype)){
   }
   
   # calculate transition probability
+  transition[[i]] = transition
   transition_prob[[i]] = transition
   for (k in 1:4){
     transition_prob[[i]][k,1] = round(transition[k,1] / sum(transition[k,1:4]), 3)
     transition_prob[[i]][k,2] = round(transition[k,2] / sum(transition[k,1:4]), 3)
     transition_prob[[i]][k,3] = round(transition[k,3] / sum(transition[k,1:4]), 3)
     transition_prob[[i]][k,4] = round(transition[k,4] / sum(transition[k,1:4]), 3)
-    #transition_prob[[i]][k,5] = sum(transition[k,1:4])
+    transition_prob[[i]][k,5] = sum(transition[k,1:4])
   }
 }
 
