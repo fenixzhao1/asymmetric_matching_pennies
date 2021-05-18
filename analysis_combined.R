@@ -487,14 +487,14 @@ rm(game_data, mean_data, pic, qre_data, qre_precision, rec1, rec2, round_data)
 ##########Data preparation for summary data and Table: Mean data of time average by treatments##########
 ## build summary data
 last_data = full_data
-# keep the last 30 seconds
-# rp_d = full_data %>% filter(mean_matching==FALSE & num_subperiods!=0) %>% 
+## keep the last 30 seconds
+# rp_d = full_data %>% filter(mean_matching==FALSE & num_subperiods!=0) %>%
 #        mutate(last30 = ifelse(tick >= 10, 1, 0))
-# rp_c = full_data %>% filter(mean_matching==FALSE & num_subperiods==0) %>% 
+# rp_c = full_data %>% filter(mean_matching==FALSE & num_subperiods==0) %>%
 #        mutate(last30 = ifelse(tick >= 120, 1, 0))
-# mm_d = full_data %>% filter(mean_matching==TRUE & num_subperiods!=0) %>% 
+# mm_d = full_data %>% filter(mean_matching==TRUE & num_subperiods!=0) %>%
 #        mutate(last30 = ifelse(tick >= 20, 1, 0))
-# mm_c = full_data %>% filter(mean_matching==TRUE & num_subperiods==0) %>% 
+# mm_c = full_data %>% filter(mean_matching==TRUE & num_subperiods==0) %>%
 #        mutate(last30 = ifelse(tick >= 240, 1, 0))
 # last_data = rbind(rp_d, rp_c, mm_d, mm_c)
 # last_data = filter(last_data, last30==1)
