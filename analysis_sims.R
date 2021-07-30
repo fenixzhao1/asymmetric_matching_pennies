@@ -24,10 +24,10 @@ learning_simulation = function(iteration, row_speed, column_speed, pure_indicato
   payoff2Bb = 0
   
   # create data container
-  simulation_data = matrix(0, nrow = iteration, ncol = 8)
+  simulation_data = matrix(0, nrow = iteration, ncol = 9)
   colnames(simulation_data) = c('iteration', 'row_strategy', 'column_strategy', 
                                 'row_next', 'column_next', 'p1_time_average', 'p2_time_average',
-                                'to_ne')
+                                'to_ne', 'to_center')
   
   size = 1
   i = 1
@@ -62,6 +62,7 @@ learning_simulation = function(iteration, row_speed, column_speed, pure_indicato
     simulation_data[i,2] = p1_strategy
     simulation_data[i,3] = p2_strategy
     simulation_data[i,8] = sqrt((p1_strategy - 0.5)^2 + (p2_strategy - 0.2)^2)
+    simulation_data[i,9] = sqrt((p1_strategy - 0.5)^2 + (p2_strategy - 0.5)^2)
     
     # update player strategies and realizations
     p1_mix = p1_mix + size * row_speed * p1_regret_sign
@@ -103,8 +104,7 @@ learning_simulation = function(iteration, row_speed, column_speed, pure_indicato
   return(simulation_data)
 }
 
-learning_simulation2 = function(iteration, row_speed, column_speed, pure_indicator, step,
-                                       p1_initial, p2_initial){
+learning_simulation2 = function(iteration, row_speed, column_speed, pure_indicator, step, p1_initial, p2_initial){
   
   # set simulation parameters
   p1_mix = p1_initial
@@ -129,10 +129,10 @@ learning_simulation2 = function(iteration, row_speed, column_speed, pure_indicat
   payoff2Bb = 0
   
   # create data container
-  simulation_data = matrix(0, nrow = iteration, ncol = 8)
+  simulation_data = matrix(0, nrow = iteration, ncol = 9)
   colnames(simulation_data) = c('iteration', 'row_strategy', 'column_strategy', 
                                 'row_next', 'column_next', 'p1_time_average', 'p2_time_average',
-                                'to_ne')
+                                'to_ne', 'to_center')
   
   size = 1
   i = 1
@@ -167,6 +167,7 @@ learning_simulation2 = function(iteration, row_speed, column_speed, pure_indicat
     simulation_data[i,2] = p1_strategy
     simulation_data[i,3] = p2_strategy
     simulation_data[i,8] = sqrt((p1_strategy - 0.5)^2 + (p2_strategy - 0.2)^2)
+    simulation_data[i,9] = sqrt((p1_strategy - 0.5)^2 + (p2_strategy - 0.5)^2)
     
     # update player strategies and realizations
     p1_mix = p1_mix + size * row_speed * p1_regret_sign
@@ -233,10 +234,10 @@ learning_simulation_AMPb = function(iteration, row_speed, column_speed, pure_ind
   payoff2Bb = 100
   
   # create data container
-  simulation_data = matrix(0, nrow = iteration, ncol = 8)
+  simulation_data = matrix(0, nrow = iteration, ncol = 9)
   colnames(simulation_data) = c('iteration', 'row_strategy', 'column_strategy', 
                                 'row_next', 'column_next', 'p1_time_average', 'p2_time_average',
-                                'to_ne')
+                                'to_ne', 'to_center')
   
   size = 1
   i = 1
@@ -271,6 +272,112 @@ learning_simulation_AMPb = function(iteration, row_speed, column_speed, pure_ind
     simulation_data[i,2] = p1_strategy
     simulation_data[i,3] = p2_strategy
     simulation_data[i,8] = sqrt((p1_strategy - 0.33)^2 + (p2_strategy - 0.75)^2)
+    simulation_data[i,9] = sqrt((p1_strategy - 0.5)^2 + (p2_strategy - 0.5)^2)
+    
+    # update player strategies and realizations
+    p1_mix = p1_mix + size * row_speed * p1_regret_sign
+    p1_mix = max(p1_mix, 0)
+    p1_mix = min(p1_mix, 1)
+    p2_mix = p2_mix + size * column_speed * p2_regret_sign
+    p2_mix = max(p2_mix, 0)
+    p2_mix = min(p2_mix, 1)
+    
+    if (pure_indicator == 1){
+      p1_strategy = ifelse(runif(1,0,1)<=p1_mix, 1, 0)
+      p2_strategy = ifelse(runif(1,0,1)<=p2_mix, 1, 0)
+    }
+    if (pure_indicator == 0){
+      p1_strategy = p1_mix
+      p2_strategy = p2_mix
+    }
+    
+    # update column 4-7
+    simulation_data[i,4] = p1_strategy
+    simulation_data[i,5] = p2_strategy
+    simulation_data[i,6] = mean(simulation_data[1:i,4])
+    simulation_data[i,7] = mean(simulation_data[1:i,5])
+    
+    # if (i == 1){
+    #   simulation_data[i,6] = simulation_data[i,4]
+    #   simulation_data[i,7] = simulation_data[i,5]
+    # }
+    # else{
+    #   simulation_data[i,6] = 0.8*simulation_data[i,4] + 0.2*simulation_data[i-1,6]
+    #   simulation_data[i,7] = 0.8*simulation_data[i,5] + 0.2*simulation_data[i-1,7]
+    # }
+    
+    i = i + 1
+    size = size * step
+  }
+  
+  # return dataset
+  return(simulation_data)
+}
+
+learning_simulation2_AMPb = function(iteration, row_speed, column_speed, pure_indicator, step, p1_initial, p2_initial){
+  
+  # set simulation parameters
+  p1_mix = p1_initial
+  p2_mix = p2_initial
+  
+  if (pure_indicator == 1){
+    p1_strategy = ifelse(runif(1,0,1)<=p1_mix, 1, 0)
+    p2_strategy = ifelse(runif(1,0,1)<=p2_mix, 1, 0)
+  }
+  if (pure_indicator == 0){
+    p1_strategy = p1_mix
+    p2_strategy = p2_mix
+  }
+  
+  payoff1Aa = 300
+  payoff1Ab = 100
+  payoff1Ba = 100
+  payoff1Bb = 700
+  payoff2Aa = 100
+  payoff2Ab = 300
+  payoff2Ba = 200
+  payoff2Bb = 100
+  
+  # create data container
+  simulation_data = matrix(0, nrow = iteration, ncol = 9)
+  colnames(simulation_data) = c('iteration', 'row_strategy', 'column_strategy', 
+                                'row_next', 'column_next', 'p1_time_average', 'p2_time_average',
+                                'to_ne', 'to_center')
+  
+  size = 1
+  i = 1
+  while (i <= iteration){
+    
+    # calculate current payoff
+    p1_u = payoff1Aa*p1_strategy*p2_strategy + payoff1Ab*p1_strategy*(1-p2_strategy) + payoff1Ba*(1-p1_strategy)*p2_strategy + payoff1Bb*(1-p1_strategy)*(1-p2_strategy)
+    p2_u = payoff2Aa*p1_strategy*p2_strategy + payoff2Ab*p1_strategy*(1-p2_strategy) + payoff2Ba*(1-p1_strategy)*p2_strategy + payoff2Bb*(1-p1_strategy)*(1-p2_strategy)
+    
+    # row player belief update
+    p1_uhat_a1 = payoff1Aa*p2_strategy + payoff1Ab*(1-p2_strategy)
+    p1_uhat_a0 = payoff1Ba*p2_strategy + payoff1Bb*(1-p2_strategy)
+    p1_ahat = ifelse(p1_uhat_a1 > p1_uhat_a0, 1, ifelse(p1_uhat_a1 < p1_uhat_a0, 0, p1_strategy))
+    p1_uhat = payoff1Aa*p1_ahat*p2_strategy + payoff1Ab*p1_ahat*(1-p2_strategy) + payoff1Ba*(1-p1_ahat)*p2_strategy + payoff1Bb*(1-p1_ahat)*(1-p2_strategy)
+    p1_regret = (p1_uhat - p1_u) / 800
+    p1_direction = p1_ahat - p1_strategy
+    p1_sign = ifelse(p1_direction > 0, 1, ifelse(p1_direction < 0, -1, 0))
+    p1_regret_sign = p1_regret * p1_sign
+    
+    # column player belief update
+    p2_uhat_a1 = payoff2Aa*p1_strategy + payoff2Ba*(1-p1_strategy)
+    p2_uhat_a0 = payoff2Ab*p1_strategy + payoff2Bb*(1-p1_strategy)
+    p2_ahat = ifelse(p2_uhat_a1 > p2_uhat_a0, 1, ifelse(p2_uhat_a1 < p2_uhat_a0, 0, p2_strategy))
+    p2_uhat = payoff2Aa*p1_strategy*p2_ahat + payoff2Ab*p1_strategy*(1-p2_ahat) + payoff2Ba*(1-p1_strategy)*p2_ahat + payoff2Bb*(1-p1_strategy)*(1-p2_ahat)
+    p2_regret = (p2_uhat - p2_u) / 200
+    p2_direction = p2_ahat - p2_strategy
+    p2_sign = ifelse(p2_direction > 0, 1, ifelse(p2_direction < 0, -1, 0))
+    p2_regret_sign = p2_regret * p2_sign
+    
+    # record data
+    simulation_data[i,1] = i
+    simulation_data[i,2] = p1_strategy
+    simulation_data[i,3] = p2_strategy
+    simulation_data[i,8] = sqrt((p1_strategy - 0.33)^2 + (p2_strategy - 0.75)^2)
+    simulation_data[i,9] = sqrt((p1_strategy - 0.5)^2 + (p2_strategy - 0.5)^2)
     
     # update player strategies and realizations
     p1_mix = p1_mix + size * row_speed * p1_regret_sign
@@ -347,10 +454,10 @@ learning_simulation_mm = function(iteration, row_speed, column_speed, pure_indic
   payoff2Bb = 0
   
   # create data container
-  simulation_data = matrix(0, nrow = iteration, ncol = 8)
+  simulation_data = matrix(0, nrow = iteration, ncol = 9)
   colnames(simulation_data) = c('iteration', 'row_strategy', 'column_strategy', 
                                 'row_next', 'column_next', 'p1_time_average', 'p2_time_average',
-                                'to_ne')
+                                'to_ne', 'to_center')
   
   i = 1
   while (i <= iteration){
@@ -408,6 +515,7 @@ learning_simulation_mm = function(iteration, row_speed, column_speed, pure_indic
     simulation_data[i,2] = p1_average
     simulation_data[i,3] = p2_average
     simulation_data[i,8] = sqrt((p1_average - 0.5)^2 + (p2_average - 0.2)^2)
+    simulation_data[i,9] = sqrt((p1_average - 0.5)^2 + (p2_average - 0.5)^2)
     
     # update player strategies and realizations
     for (j in 1:group_size){
@@ -446,7 +554,7 @@ learning_simulation_mm = function(iteration, row_speed, column_speed, pure_indic
 
 ##########Figure: Fitted regret-based model simulation RP dynamics##########
 # run the simulation
-title = paste('Simulation2D AMPa rp M 1')
+title = paste('Simulation2D AMPb 2')
 file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/sims/", title, sep = "")
 file = paste(file, ".png", sep = "")
 png(file, width = 500, height = 500)
@@ -456,13 +564,13 @@ p1_average = c()
 p2_average = c()
 sims = 20
 iteration = 500
-row_speed = 0.1
-column_speed = 0.24
+row_speed = 1.17
+column_speed = 0.96
 pure_indicator = 0
 step = 1
 
 for (j in 1:sims){
-  simulation_data = data.frame(learning_simulation(iteration, row_speed, column_speed, pure_indicator, step))
+  simulation_data = data.frame(learning_simulation_AMPb(iteration, row_speed, column_speed, pure_indicator, step))
   par(new=TRUE)
 
   # # draw 3D plots
@@ -509,15 +617,17 @@ for (j in 1:sims){
   p2_average = cbind(p2_average, simulation_data$p2_time_average[iteration])
 }
 
-text(0.5,0.2,'NE',cex=1,pos=3,col="blue")
-text(0.2,0.5,'MM',cex=1,pos=3,col="red")
+# text(0.5,0.2,'NE',cex=1,pos=3,col="blue")
+# text(0.2,0.5,'MM',cex=1,pos=3,col="red")
+text(0.33,0.75,'NE',cex=1,pos=3,col="blue")
+text(0.75,0.67,'MM',cex=1,pos=3,col="red")
 
 dev.off()
 
 print(c(mean(p1_average), mean(p2_average)))
 
 
-##########Figure: Fitted regret-based model simulation MM dynamics##########
+##########Figure (not used): Fitted regret-based model simulation MM dynamics##########
 # run the simulation
 title = paste('Simulation3D AMPa mm P')
 file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/sims/", title, sep = "")
@@ -592,15 +702,15 @@ print(c(mean(p1pop_average), mean(p2pop_average)))
 
 ##########Figure: Limited cycles simulation##########
 # define figure title
-title = paste('limit_cycle_low_beta')
+title = paste('ampb_limit_cycle_high_beta')
 file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/sims/", title, sep = "")
 file = paste(file, ".png", sep = "")
 png(file, width = 800, height = 400)
 
 # set simulation parameters
 iteration = 1500
-row_speed = 0.1
-column_speed = 0.24
+row_speed = 1
+column_speed = 1
 pure_indicator = 0
 step = 1
 sims = 20
@@ -611,32 +721,32 @@ for (j in 1:sims){
   p2_initial = runif(1, min = 0, max = 1)
   
   # draw figure of learning process
-  simulation_data = data.frame(learning_simulation2(
+  simulation_data = data.frame(learning_simulation2_AMPb(
     iteration, row_speed, column_speed, pure_indicator, step, p1_initial, p2_initial))
-  tripwire_data = subset(simulation_data, column_strategy > 0.2)
-  tripwire_data = subset(tripwire_data, (row_strategy - 0.5)*(row_next - 0.5) <= 0)
+  tripwire_data = subset(simulation_data, column_strategy > 0.75)
+  tripwire_data = subset(tripwire_data, (row_strategy - 0.33)*(row_next - 0.33) <= 0)
   
   if (j == 1){
     plot(tripwire_data$to_ne+0.001, type = 'l', col = 'blue',
-         xlab = 'number of cycles', ylab = 'Deviation to NE', ylim = c(0,0.7),
-         main = 'Limit Cycle with Poincare Section (a=0.5, b>0.2) and beta=0.1/0.24',
+         xlab = 'number of cycles', ylab = 'Deviation to NE', ylim = c(0,0.5),
+         main = 'Limit Cycle with Poincare Section (a=0.33, b>0.75) and beta=1',
          cex.main = 1.5, cex.lab = 1.5)
   }
   else{
-    lines(tripwire_data$to_ne+0.001, type = 'l', col = 'blue', ylim = c(0,0.7))
+    lines(tripwire_data$to_ne+0.001, type = 'l', col = 'blue', ylim = c(0,0.5))
   }
   
   ## start inside the circle
-  p1_initial = runif(1, min = 0.49, max = 0.51)
-  p2_initial = runif(1, min = 0.19, max = 0.21)
+  p1_initial = runif(1, min = 0.32, max = 0.34)
+  p2_initial = runif(1, min = 0.74, max = 0.76)
 
   # draw figure of learning process
-  simulation_data = data.frame(learning_simulation2(
+  simulation_data = data.frame(learning_simulation2_AMPb(
     iteration, row_speed, column_speed, pure_indicator, step, p1_initial, p2_initial))
-  tripwire_data = subset(simulation_data, column_strategy > 0.2)
-  tripwire_data = subset(tripwire_data, (row_strategy - 0.5)*(row_next - 0.5) <= 0)
+  tripwire_data = subset(simulation_data, column_strategy > 0.75)
+  tripwire_data = subset(tripwire_data, (row_strategy - 0.33)*(row_next - 0.33) <= 0)
   
-  lines(tripwire_data$to_ne, type = 'l', col = 'red', ylim = c(0,0.7))
+  lines(tripwire_data$to_ne, type = 'l', col = 'red', ylim = c(0,0.5))
 }
 
 dev.off()
@@ -644,7 +754,7 @@ dev.off()
 rm(simulation_data, tripwire_data)
 
 
-##########Table: Transition probability matrix for pure###########
+##########Table (not used): Transition probability matrix for pure###########
 # load packages
 library(dplyr)
 
@@ -759,7 +869,7 @@ for (i in 1:length(df$beta)){
   p2_avg = 0
   
   for (j in 1:sims){
-    simulation_function = data.frame(learning_simulation(iteration, row_speed, column_speed, pure_indicator, step))
+    simulation_function = data.frame(learning_simulation_AMPb(iteration, row_speed, column_speed, pure_indicator, step))
     p1_avg = p1_avg + round(mean(simulation_function$row_next[1000:1500]), digits = 3)
     p2_avg = p2_avg + round(mean(simulation_function$column_next[1000:1500]), digits = 3)
   }
@@ -769,7 +879,7 @@ for (i in 1:length(df$beta)){
 }
 
 # draw figure
-title = paste('time_average_over_beta')
+title = paste('ampb_time_average_over_beta')
 file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/sims/", title, sep = "")
 file = paste(file, ".png", sep = "")
 png(file, width = 800, height = 400)
@@ -781,8 +891,8 @@ pic = ggplot() +
   #             method = loess, formula = 'y ~ x', colour = 'blue') +
   # geom_smooth(data = df, mapping = aes(x = beta, y = p2_average), stat = 'smooth',
   #             method = loess, formula = 'y ~ x', colour = 'red') +
-  geom_hline(aes(yintercept=0.5), colour = 'black', linetype = 'dotted') +
-  geom_hline(aes(yintercept=0.2), colour = 'black', linetype = 'dotted') +
+  geom_hline(aes(yintercept=0.33), colour = 'black', linetype = 'dotted') +
+  geom_hline(aes(yintercept=0.75), colour = 'black', linetype = 'dotted') +
   ggtitle('time average over beta') +
   scale_x_continuous(name='beta', limits = c(0,4), breaks = seq(0,4,0.5)) +
   scale_y_continuous(name='time average', limits = c(0,1), breaks = seq(0,1,0.5)) +
@@ -807,24 +917,28 @@ step = 1
 sims = 20
 
 # set storage dataset
-df = data.frame(beta = seq(0.1, 4, 0.2), to_ne = rep(NA, length(seq(0.1, 4, 0.2))))
+df = data.frame(beta = seq(0.1, 4, 0.2), to_ne = rep(NA, length(seq(0.1, 4, 0.2))),
+                to_center = rep(NA, length(seq(0.1, 4, 0.2))))
 
 for (i in 1:length(df$beta)){
   row_speed = df$beta[i]
   column_speed = df$beta[i]
   to_ne = 0
+  to_center = 0
   
   for (j in 1:sims){
-    simulation_function = data.frame(learning_simulation(iteration, row_speed, column_speed, pure_indicator, step))
+    simulation_function = data.frame(learning_simulation_AMPb(iteration, row_speed, column_speed, pure_indicator, step))
     to_ne = to_ne + mean(simulation_function$to_ne[1000:1500])
+    to_center = to_center + mean(simulation_function$to_center[1000:1500])
   }
   
   df$to_ne[i] = to_ne / sims
+  df$to_center[i] = to_center / sims
 }
 
 # draw figure
 library(ggplot2)
-title = paste('distance_to_NE_over_beta')
+title = paste('ampb_distance_over_beta')
 file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/sims/", title, sep = "")
 file = paste(file, ".png", sep = "")
 png(file, width = 800, height = 400)
@@ -833,11 +947,13 @@ pic = ggplot() +
   # geom_smooth(data = df, mapping = aes(x = beta, y = to_ne), stat = 'smooth',
   #             method = loess, formula = 'y ~ x', se = FALSE) +
   geom_line(data = df, mapping = aes(x = beta, y = to_ne, colour = 'blue'), size = 1) +
-  ggtitle('distance to NE over beta') +
+  geom_line(data = df, mapping = aes(x = beta, y = to_center, colour = 'red'), size = 1) +
+  ggtitle('distance to NE/Center over beta') +
   scale_x_continuous(name='beta', limits = c(0,4), breaks = seq(0,4,0.5)) +
-  scale_y_continuous(name='distance to NE') +
+  scale_y_continuous(name='radius') +
+  scale_colour_manual(values=c('blue','red'), 
+                      labels=c('to NE','to Center')) +
   theme_bw() + 
-  scale_colour_manual(values=c('blue'), labels=c('distance')) +
   theme(plot.title = element_text(hjust = 0.5, size = 20), legend.text = element_text(size = 15),
         axis.title.x = element_text(size = 15), axis.title.y = element_text(size = 15),
         axis.text.x = element_text(size = 15), axis.text.y = element_text(size = 15))

@@ -162,7 +162,7 @@ for (i in 1:2){
   
   median_table[[i]] = matrix(0, nrow = 6, ncol = 6)
   rownames(median_table[[i]]) = c('mm', 'rp', 'Mixed', 'Pure', 'Continuous', 'Discrete')
-  colnames(median_table[[i]]) = c('CW', 'Ccw', 'DD', 'CD', 'Stay', 'Num of Instances')
+  colnames(median_table[[i]]) = c('CW', 'CCW', 'DD', 'CD', 'Stay', 'Num of Instances')
   
   # mm vs rp
   data1 = subset(game_data, match == 'mm')
@@ -276,32 +276,34 @@ for (i in 1:100){
 }
 
 # Set colors in levelplot: rainbow or heatcolor
-n = 10
-#colours = rev(rainbow(n, s = 1, v = 1, start = 0, end = 0.9, alpha = 1))
-colours = rev(heat.colors(n, alpha = 1))
+n = 12
+colours = rev(rainbow(n, s = 1, v = 1, start = 0, end = 1, alpha = 0.5))
+#colours = rev(heat.colors(n, alpha = 1))
+#colours = rev(grey.colors(n, start = 0, end = 1, alpha = 1))
 rgb.palette <- colorRampPalette(colours, space = "Lab")
 
 # Change ticks in levelplot
 x.scale <- list(at=seq(from = 0, to = 100, length.out = 6))
 y.scale <- list(at=seq(from = 0, to = 100, length.out = 6))
 
-heat = levelplot(z, col.regions=rgb.palette(1000),
+heat = levelplot(z, col.regions=rgb.palette(10000),
                  scales=list(x=x.scale, y=y.scale),
                  main="Predictions on row player payoff heatmap",
                  xlab="row action",
                  ylab="column action" ,
                  cuts = 1000)
-NE <- layer(panel.points(y=100*0.2, x= 100*0.5, col = "black", cex=1.5))
-NEText <- layer(panel.text(y=100*0.2, x= 100*0.5, labels= "NE", pos=4, cex=1.5))
-MM <- layer(panel.points(y=100*0.5, x= 100*0.2, col = "black", cex=1.5))
-MMText <- layer(panel.text(y=100*0.5, x= 100*0.2, labels= "MM", pos=4, cex=1.5))
-Mid <- layer(panel.points(y=100*0.5, x= 100*0.5, col = "black", cex=1.5))
-MidText <- layer(panel.text(y=100*0.5, x= 100*0.5, labels= "Center", pos=4, cex=1.5))
-curve <- layer(panel.xyplot(100*qre_precision$p1_row, 100*qre_precision$p2_row, type = 'l', col = 'black', pch = 20))
+
+NE <- layer(panel.points(y=100*0.2, x= 100*0.5, col = "white", cex=1.5))
+NEText <- layer(panel.text(y=100*0.2, x= 100*0.5, labels= "NE", col = "white", pos=4, cex=1.5))
+MM <- layer(panel.points(y=100*0.5, x= 100*0.2, col = "white", cex=1.5))
+MMText <- layer(panel.text(y=100*0.5, x= 100*0.2, labels= "MM", col = "white", pos=4, cex=1.5))
+Mid <- layer(panel.points(y=100*0.5, x= 100*0.5, col = "white", cex=1.5))
+MidText <- layer(panel.text(y=100*0.5, x= 100*0.5, labels= "Center", col = "white", pos=4, cex=1.5))
+curve <- layer(panel.xyplot(100*qre_precision$p1_row, 100*qre_precision$p2_row, type = 'l', col = 'white', pch = 20))
 
 fullplot = heat + NE + NEText + MM + MMText + Mid + MidText + curve
 
-title = 'AMPaheatmap+ptpreds_heat'
+title = 'AMPaheatmap_rainbow_white'
 file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/gambit/", title, sep = "")
 file = paste(file, ".png", sep = "")
 png(file)
@@ -309,7 +311,7 @@ print(fullplot)
 dev.off()
 
 
-##########Figure: time average scatter plot by games##########
+##########Figure (not used): time average scatter plot by games##########
 # create empty dataset
 length = rep(NA, length(treatmenttype))
 mean_data = data.frame(p1_average = length, p2_average = length, p1_median = length, p2_median = length, 
@@ -461,6 +463,197 @@ for (i in 1:length(gametype)){
       geom_point(aes(x = seq(from=0.5, to=game_data$p1NEmix[1], by=-0.01), 
                      y = seq(from=0.5, to=game_data$p2NEmix[1], by=0.01))) +
       geom_point(data = game_data, aes(x = p1_average, y = p2_average, color = treatments), size=3) +
+      geom_text(aes(x = game_data$p1NEmix[1], y = game_data$p2NEmix[1],
+                    label = 'NE'), vjust = -0.2, hjust = -0.2) +
+      geom_text(aes(x = 0.5, y = 0.5,
+                    label = 'Center'), vjust = -0.1, hjust = -0.1) +
+      geom_point(data = game_data, aes(x = p1NEmix[1], y = p2NEmix[1]), size=3) +
+      geom_point(data = game_data, aes(x = 0.5, y = 0.5), size=3) +
+      ggtitle(title) +
+      scale_x_continuous(name='row strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+      scale_y_continuous(name='column strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+      theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5, size = 25),
+            axis.title.x = element_text(size = 20), axis.title.y = element_text(size = 20),
+            legend.text = element_text(size = 15))
+    
+    print(pic)
+    dev.off()
+  }
+}
+
+# remove temp data
+rm(game_data, mean_data, pic, qre_data, qre_precision, rec1, rec2, round_data)
+
+
+##########Figure: new time average scatter plot by games##########
+# create empty dataset
+length = rep(NA, length(treatmenttype))
+mean_data = data.frame(p1_average = length, p2_average = length, p1_median = length, p2_median = length, 
+                       p1_q1 = length, p2_q1 = length, p1_q3 = length, p2_q3 = length, 
+                       sd_p1 = length, sd_p2 = length, p1_payoff = length, p2_payoff = length,
+                       p1NEmix = length, p2NEmix = length, p1MMmix = length, p2MMmix = length,
+                       time = length, actionsets = length, match = length, game = length, treatments = length)
+
+# loop over treatments
+for (i in 1:length(treatmenttype)){
+  round_data = filter(full_data, treatmentfull == treatmenttype[i])
+  
+  # fill in the mean_data row i
+  mean_data$p1_average[i] = mean(round_data$p1_strategy)
+  mean_data$p2_average[i] = mean(round_data$p2_strategy)
+  mean_data$p1_median[i] = median(round_data$p1_strategy)
+  mean_data$p2_median[i] = median(round_data$p2_strategy)
+  mean_data$p1_q1[i] = quantile(round_data$p1_strategy, 0.25)
+  mean_data$p1_q3[i] = quantile(round_data$p1_strategy, 0.75)
+  mean_data$p2_q1[i] = quantile(round_data$p2_strategy, 0.25)
+  mean_data$p2_q3[i] = quantile(round_data$p2_strategy, 0.75)
+  mean_data$sd_p1[i] = sd(round_data$p1_strategy)
+  mean_data$sd_p2[i] = sd(round_data$p2_strategy)
+  
+  mean_data$p1NEmix[i] = round_data$p1NEmix[1]
+  mean_data$p2NEmix[i] = round_data$p2NEmix[1]
+  mean_data$p1MMmix[i] = round_data$p1MMmix[1]
+  mean_data$p2MMmix[i] = round_data$p2MMmix[1]
+  mean_data$p1_payoff[i] = mean(round_data$p1_payoff)
+  mean_data$p2_payoff[i] = mean(round_data$p2_payoff)
+  
+  mean_data$time[i] = as.character(round_data$time[1])
+  mean_data$actionsets[i] = as.character(round_data$actionsets[1])
+  mean_data$match[i] = as.character(round_data$match[1])
+  mean_data$game[i] = as.character(round_data$game[1])
+  mean_data$treatments[i] = as.character(round_data$treatmentfull[1])
+}
+mean_data = mean_data %>% mutate(action_match = paste(actionsets, match, sep = '_'))
+
+# Generate scatter plot
+# loop over games
+for (i in 1:length(gametype)){
+  game_data = subset(mean_data, game == gametype[i])
+  
+  # AMPb game
+  if (gametype[i] == 'AMPb'){
+    # read qre info
+    qre_data = read.csv("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/gambit/qre_3117.csv", header = T)
+    qre_precision = subset(qre_data, lambda<2)
+    qre_precision = arrange(qre_precision, lambda)
+    
+    # add RDCE data
+    rec1 = data.frame(pmin=0, pmax=0.33, qmin=0.5, qmax=0.75)
+    rec2 = data.frame(pmin=0.33, pmax=0.5, qmin=0, qmax=0.5)
+    
+    # set title
+    title = paste('time_average', as.character(game_data$game[1]), sep = '_')
+    file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/", title, sep = "")
+    file = paste(file, ".png", sep = "")
+    png(file, width = 600, height = 450)
+    
+    # scatter plot
+    pic = ggplot() +
+      geom_rect(mapping = aes(xmin = 0, ymin = 0.5, xmax = 0.33, ymax = 0.75), 
+                color = 'azure2', fill = 'azure2', alpha = 0.5, size = 1.5) +
+      geom_rect(mapping = aes(xmin = 0.33, ymin = 0, xmax = 0.5, ymax = 0.5), 
+                color = 'azure2', fill = 'azure2', alpha = 0.5, size = 1.5) +
+      geom_point(data = qre_precision, aes(x = p1_row, y = p2_row)) +
+      
+      geom_point(data = game_data, aes(x = p1_average, y = p2_average, 
+                                       color = time, shape = action_match), size=4) +
+      scale_color_manual(values = c('red','blue'))+
+      scale_shape_manual(values = c(1,2,16,17))+
+      
+      geom_text(aes(x = game_data$p1NEmix[1], y = game_data$p2NEmix[1],
+                    label = 'NE'), vjust = -0.2, hjust = -0.2) +
+      geom_text(aes(x = game_data$p1MMmix[1], y = game_data$p2MMmix[1],
+                    label = 'MM'), vjust = -0.2, hjust = -0.2) +
+      geom_text(aes(x = 0.5, y = 0.5,
+                    label = 'Center'), vjust = -0.1, hjust = -0.1) +
+      geom_point(data = game_data, aes(x = p1NEmix[1], y = p2NEmix[1]), size=3) +
+      geom_point(data = game_data, aes(x = p1MMmix[1], y = p2MMmix[1]), size=3) +
+      geom_point(data = game_data, aes(x = 0.5, y = 0.5), size=3) +
+      
+      ggtitle(title) +
+      scale_x_continuous(name='row strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+      scale_y_continuous(name='column strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+      theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5, size = 25),
+            axis.title.x = element_text(size = 20), axis.title.y = element_text(size = 20),
+            legend.text = element_text(size = 15))
+    
+    print(pic)
+    dev.off()
+  }
+  
+  # AMPa game
+  else if (gametype[i] == 'AMPa'){
+    # read qre info
+    qre_data = read.csv("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/gambit/qre_8002.csv", header = T)
+    qre_precision = subset(qre_data, lambda<2)
+    qre_precision = arrange(qre_precision, lambda)
+    
+    # add RDCE data
+    rec1 = data.frame(pmin=0.5, pmax=1, qmin=0.2, qmax=0.5)
+    
+    # set title
+    title = paste('time_average', as.character(game_data$game[1]), sep = '_')
+    file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/", title, sep = "")
+    file = paste(file, ".png", sep = "")
+    png(file, width = 600, height = 450)
+    
+    # scatter plot
+    pic = ggplot() +
+      geom_rect(mapping = aes(xmin = 0.5, ymin = 0.2, xmax = 1, ymax = 0.5), 
+                color = 'azure2', fill = 'azure2', alpha = 0.5, size = 1.5) +
+      geom_point(data = qre_precision, aes(x = p1_row, y = p2_row)) +
+      
+      geom_point(data = game_data, aes(x = p1_average, y = p2_average, 
+                                       color = time, shape = action_match), size=4) +
+      scale_color_manual(values = c('red','blue'))+
+      scale_shape_manual(values = c(1,2,16,17))+
+      
+      geom_text(aes(x = game_data$p1NEmix[1], y = game_data$p2NEmix[1],
+                    label = 'NE'), vjust = -0.2, hjust = -0.2) +
+      geom_text(aes(x = game_data$p1MMmix[1], y = game_data$p2MMmix[1],
+                    label = 'MM'), vjust = -0.2, hjust = -0.2) +
+      geom_text(aes(x = 0.5, y = 0.5,
+                    label = 'Center'), vjust = -0.1, hjust = -0.1) +
+      geom_point(data = game_data, aes(x = p1NEmix[1], y = p2NEmix[1]), size=3) +
+      geom_point(data = game_data, aes(x = p1MMmix[1], y = p2MMmix[1]), size=3) +
+      geom_point(data = game_data, aes(x = 0.5, y = 0.5), size=3) +
+      ggtitle(title) +
+      scale_x_continuous(name='row strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+      scale_y_continuous(name='column strategy', limits = c(0,1), breaks = seq(0,1,0.1)) +
+      theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5, size = 25),
+            axis.title.x = element_text(size = 20), axis.title.y = element_text(size = 20),
+            legend.text = element_text(size = 15))
+    
+    print(pic)
+    dev.off()
+  }
+  
+  # IDDS game
+  else{
+    # set title
+    title = paste('time_average', as.character(game_data$game[1]), sep = '_')
+    file = paste("D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/writeup/figs/", title, sep = "")
+    file = paste(file, ".png", sep = "")
+    png(file, width = 600, height = 450)
+    
+    # add RDCE data
+    rec1 = data.frame(pmin=0, pmax=0.5, qmin=0.5, qmax=1)
+    
+    # scatter plot
+    pic = ggplot() +
+      geom_rect(mapping = aes(xmin = 0, ymin = 0.5, xmax = 0.5, ymax = 1), 
+                color = 'azure2', fill = 'azure2', alpha = 0.5, size = 1.5) +
+      geom_point(aes(x = seq(from=0.5, to=game_data$p1NEmix[1], by=-0.01), 
+                     y = seq(from=0.5, to=game_data$p2NEmix[1], by=0.01))) +
+      
+      geom_point(data = game_data, aes(x = p1_average, y = p2_average, 
+                                       color = time, shape = action_match), size=4) +
+      scale_color_manual(values = c('red','blue'))+
+      scale_shape_manual(values = c(1,2,16,17))+
+      
       geom_text(aes(x = game_data$p1NEmix[1], y = game_data$p2NEmix[1],
                     label = 'NE'), vjust = -0.2, hjust = -0.2) +
       geom_text(aes(x = 0.5, y = 0.5,
@@ -1010,7 +1203,111 @@ xtable(head(median_table[[3]]),digits=3,caption="Distance to predictions.")
 rm(game_data, last_data, round_data, mean_data, data1, data2, median_table)
 
 
-##########Data preparation for beta estimation and Figure: Correlation between dispersion and beta estimation##########
+##########Table: Mean data of time average testing both H3 and H4##########
+## build summary data
+last_data = full_data
+
+# create empty dataset
+length = rep(NA, length(uniqueID))
+mean_data = data.frame(session_id = length, group_id = length, treatments = length,
+                       p1_average = length, p2_average = length, p1_median = length, p2_median = length, 
+                       p1_payoff = length, p2_payoff = length,
+                       p1NEmix = length, p2NEmix = length, p1MMmix = length, p2MMmix = length,
+                       time = length, actionsets = length, match = length, game = length)
+
+# loop over group_id
+for (i in 1:length(uniqueID)){
+  round_data = subset(last_data, group_id == uniqueID[i])
+  
+  # fill in the mean_data row i
+  mean_data$session_id[i] = as.character(round_data$session_code[1])
+  mean_data$group_id[i] = as.character(round_data$group_id[1])
+  
+  mean_data$p1_average[i] = mean(round_data$p1_strategy)
+  mean_data$p2_average[i] = mean(round_data$p2_strategy)
+  mean_data$p1_median[i] = median(round_data$p1_strategy)
+  mean_data$p2_median[i] = median(round_data$p2_strategy)
+  
+  mean_data$p1NEmix[i] = round_data$p1NEmix[1]
+  mean_data$p2NEmix[i] = round_data$p2NEmix[1]
+  mean_data$p1MMmix[i] = round_data$p1MMmix[1]
+  mean_data$p2MMmix[i] = round_data$p2MMmix[1]
+  mean_data$p1_payoff[i] = mean(round_data$p1_payoff)
+  mean_data$p2_payoff[i] = mean(round_data$p2_payoff)
+  
+  mean_data$time[i] = as.character(round_data$time[1])
+  mean_data$actionsets[i] = as.character(round_data$actionsets[1])
+  mean_data$match[i] = as.character(round_data$match[1])
+  mean_data$game[i] = as.character(round_data$game[1])
+  mean_data$treatments[i] = as.character(round_data$treatmentfull[1])
+}
+
+mean_data = arrange(mean_data, group_id)
+
+## Generate Table
+# load package
+library(MASS)
+
+# create list
+median_table = list()
+
+# loop over game
+for (i in 1:length(gametype)){
+  game_data = subset(mean_data, game == gametype[i])
+  
+  median_table[[i]] = matrix(0, nrow = 6, ncol = 6)
+  rownames(median_table[[i]]) = c('mm', 'rp', 'Mixed', 'Pure', 'Continuous', 'Discrete')
+  colnames(median_table[[i]]) = c('Distance to NE', ' ','Distance to Center', 
+                                  ' ', 'Distance to MM', 'Num of Instances')
+  
+  # mm vs rp
+  data1 = subset(game_data, match == 'mm')
+  median_table[[i]][1,1] = sqrt((mean(data1$p1_average) - data1$p1NEmix[1])^2 + (mean(data1$p2_average) - data1$p2NEmix[1])^2)
+  median_table[[i]][1,3] = sqrt((mean(data1$p1_average) - 0.5)^2 + (mean(data1$p2_average) - 0.5)^2)
+  median_table[[i]][1,5] = sqrt((mean(data1$p1_average) - data1$p1MMmix[1])^2 + (mean(data1$p2_average) - data1$p2MMmix[1])^2)
+  median_table[[i]][1,6] = length(data1$group_id)
+  
+  data2 = subset(game_data, match == 'rp')
+  median_table[[i]][2,1] = sqrt((mean(data2$p1_average) - data2$p1NEmix[1])^2 + (mean(data2$p2_average) - data2$p2NEmix[1])^2)
+  median_table[[i]][2,3] = sqrt((mean(data2$p1_average) - 0.5)^2 + (mean(data2$p2_average) - 0.5)^2)
+  median_table[[i]][2,5] = sqrt((mean(data2$p1_average) - data2$p1MMmix[1])^2 + (mean(data2$p2_average) - data2$p2MMmix[1])^2)
+  median_table[[i]][2,6] = length(data2$group_id)
+  
+  # mixed vs pure
+  data1 = subset(game_data, actionsets == 'M')
+  median_table[[i]][3,1] = sqrt((mean(data1$p1_average) - data1$p1NEmix[1])^2 + (mean(data1$p2_average) - data1$p2NEmix[1])^2)
+  median_table[[i]][3,3] = sqrt((mean(data1$p1_average) - 0.5)^2 + (mean(data1$p2_average) - 0.5)^2)
+  median_table[[i]][3,5] = sqrt((mean(data1$p1_average) - data1$p1MMmix[1])^2 + (mean(data1$p2_average) - data1$p2MMmix[1])^2)
+  median_table[[i]][3,6] = length(data1$group_id)
+  
+  data2 = subset(game_data, actionsets == 'P')
+  median_table[[i]][4,1] = sqrt((mean(data2$p1_average) - data2$p1NEmix[1])^2 + (mean(data2$p2_average) - data2$p2NEmix[1])^2)
+  median_table[[i]][4,3] = sqrt((mean(data2$p1_average) - 0.5)^2 + (mean(data2$p2_average) - 0.5)^2)
+  median_table[[i]][4,5] = sqrt((mean(data2$p1_average) - data2$p1MMmix[1])^2 + (mean(data2$p2_average) - data2$p2MMmix[1])^2)
+  median_table[[i]][4,6] = length(data2$group_id)
+  
+  # continuous vs discrete
+  data1 = subset(game_data, time == 'C')
+  median_table[[i]][5,1] = sqrt((mean(data1$p1_average) - data1$p1NEmix[1])^2 + (mean(data1$p2_average) - data1$p2NEmix[1])^2)
+  median_table[[i]][5,3] = sqrt((mean(data1$p1_average) - 0.5)^2 + (mean(data1$p2_average) - 0.5)^2)
+  median_table[[i]][5,5] = sqrt((mean(data1$p1_average) - data1$p1MMmix[1])^2 + (mean(data1$p2_average) - data1$p2MMmix[1])^2)
+  median_table[[i]][5,6] = length(data1$group_id)
+  
+  data2 = subset(game_data, time == 'D')
+  median_table[[i]][6,1] = sqrt((mean(data2$p1_average) - data2$p1NEmix[1])^2 + (mean(data2$p2_average) - data2$p2NEmix[1])^2)
+  median_table[[i]][6,3] = sqrt((mean(data2$p1_average) - 0.5)^2 + (mean(data2$p2_average) - 0.5)^2)
+  median_table[[i]][6,5] = sqrt((mean(data2$p1_average) - data2$p1MMmix[1])^2 + (mean(data2$p2_average) - data2$p2MMmix[1])^2)
+  median_table[[i]][6,6] = length(data2$group_id)
+}
+
+xtable(head(median_table[[1]]),digits=3,caption="Distance to predictions.")
+xtable(head(median_table[[2]]),digits=3,caption="Distance to predictions.")
+xtable(head(median_table[[3]]),digits=3,caption="Distance to predictions.")
+
+rm(game_data, last_data, round_data, mean_data, data1, data2, median_table)
+
+
+##########Data preparation for beta estimation and Figure (not used): Correlation between dispersion and beta estimation##########
 ## build summary data
 last_data = full_data
 
@@ -1176,7 +1473,7 @@ write.dta(mean_data, "D:/Dropbox/Working Papers/When Are Mixed Equilibria Releva
 rm(last_data, mean_data, pic, round_data)
 
 
-##########Table: Mean data of time average and compare NE MM Center with loglikelihood##########
+##########Table (not used): Mean data of time average and compare NE MM Center with loglikelihood##########
 # keep data
 last_data = full_data
 
@@ -1858,7 +2155,7 @@ xtable(median_table[[2]],digits=3,caption="Distance to predictions.")
 xtable(median_table[[3]],digits=3,caption="Distance to predictions.")
 
 
-##########Figure (not used): Transition between 8002 and 3117##########
+##########Figure (not used): Transition between AMPa and AMPb##########
 # create empty dataset
 length = rep(NA, length(uniqueID))
 mean_data = data.frame(round = length, p1_average = length, p2_average = length,
@@ -1950,7 +2247,7 @@ plot(sr2_data$p2_diff_payoff, sr2_data$p2_switch_rate, type='l', xlim = c(-100,1
 dev.off()
 
 
-##########Figure & Table (not used): data summary chart and table by game##########
+##########Figure (not used): median data summary by game##########
 # create data container
 plot_data = list()
 
@@ -2218,7 +2515,7 @@ print(MMrow, vp = vplayout(2:4,4))
 dev.off()
 
 
-##########Table: Transition probability matrix##########
+##########Table (not used): Transition probability matrix##########
 # get rid of IDDS
 mp_data = filter(full_data, game != 'IDDS')
 mp_data = mp_data %>% arrange(session_code, subsession_id, id_in_subsession, silo_num, tick)
