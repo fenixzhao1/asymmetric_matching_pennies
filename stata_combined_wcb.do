@@ -73,7 +73,7 @@ save "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/producti
 
 
 
-**********T-test: data summary table with time averages (Table 4)**********
+**********T-test: data summary table with time averages (Appendix)**********
 use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_summary.dta", clear
 
 gen diff_ne_mid = Deviation_NE - Deviation_Mid
@@ -177,7 +177,7 @@ boottest {_cons}, noci nograph weight(webb) cluster(session_id) bootcl(individua
 
 
 
-**********T-test: signed distance to NE, MM, and Center for row and column players (Table 3)**********
+**********T-test: signed distance to NE, MM, and Center for row and column players (Appendix)**********
 use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_summary.dta", clear
 
 * generate signed distance dependent variables
@@ -430,7 +430,7 @@ boottest {_cons}, noci nograph weight(webb) cluster(session_id) bootcl(individua
 
 
 
-**********data summary table with time averages (Table 5)**********
+**********data summary table with time averages (Table 3)**********
 use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_summary.dta", clear
 
 * drop IDDS
@@ -562,7 +562,7 @@ outreg2 using D:\Dropbox\stataresult, tex nonote stats(coef pval) append nolabel
 
 
 
-**********T-test: data summary table with time averages (Table 6)**********
+**********T-test: data summary table with time averages (Table 4)**********
 use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_summary_cycle.dta", clear
 
 gen diff_cw_ccw = cw - ccw
@@ -685,7 +685,7 @@ boottest {_cons}, noci nograph weight(webb) cluster(session_id) bootcl(individua
 
 
 
-**********Directional learning (Table 7)**********
+**********Directional learning (Table 5)**********
 use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta", clear
 drop if game_idds == 1
 
@@ -961,7 +961,7 @@ restore
 
 
 
-**********Directional learning with F test for each treatment**********
+**********Directional learning with F test for each treatment (Appendix)**********
 use "D:/Dropbox/Working Papers/When Are Mixed Equilibria Relevant/data/production/mp_production.dta", clear
 drop if game_idds == 1
 
